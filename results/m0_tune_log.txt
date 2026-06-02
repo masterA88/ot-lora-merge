@@ -1,0 +1,163 @@
+
+========== INSTALL torch 2.6.0+cu124 ==========
+torch 2.6.0+cu124 Tesla P100-PCIE-16GB
+CUDA OK
+
+========== FB run() SOURCE (interpret scaling) ==========
+----- TaskArithmeticAlgorithm.run -----
+    @torch.no_grad()
+    def run(self, modelpool: Union[BaseModelPool, Dict[str, nn.Module]]) -> nn.Module:
+        """
+        Runs the Task Arithmetic Algorithm to fuse models in the given model pool.
+
+        Args:
+            modelpool (Union[BaseModelPool, Dict[str, nn.Module]]): The pool of models to fuse.
+
+        Returns:
+            nn.Module: The pre-trained model with the merged task vectors.
+        """
+        if not isinstance(modelpool, BaseModelPool):
+            modelpool = BaseModelPool(modelpool)
+
+        log.info("Fusing models using task arithmetic.")
+        task_vector = None
+        with self.profile("load model"):
+            pretrained_model = modelpool.load_model("_pretrained_")
+
+        # Calculate the total task vector
+        for model_name in modelpool.model_names:
+            with self.profile("load model"):
+                model = modelpool.load_model(model_name)
+            with self.profile("merge weights"):
+                if task_vector is None:
+                    task_vector = state_dict_sub(
+                        model.state_dict(),
+                        pretrained_model.state_dict(),
+                    )
+                else:
+                    task_vector = state_dict_add(
+                        task_vector,
+                        state_dict_sub(
+                            model.state_dict(),
+                            pretrained_model.state_dict(),
+                        ),
+                    )
+        with self.profile("merge weights"):
+            # scale the task vector
+            # here we keep the dtype when the elements of value are all zeros to avoid dtype mismatch
+            task_vector = state_dict_mul(
+                task_vector, self.config.scaling_factor, keep_dtype_when_zero=True
+            )
+      
+----- TiesMergingAlgorithm.run -----
+    @torch.no_grad()
+    def run(
+        self, modelpool: BaseModelPool | Dict[str, nn.Module], **kwargs: Any
+    ) -> nn.Module:
+        """
+        Run the TIES merging algorithm to fuse models in the model pool.
+
+        Args:
+            modelpool (BaseModelPool | Dict[str, nn.Module]): The model pool containing the models to fuse.
+
+        Returns:
+            nn.Module: The fused model.
+        """
+        log.info("Fusing models using ties merging.")
+        modelpool = to_modelpool(modelpool)
+        remove_keys = self.config.get("remove_keys", [])
+        merge_func = self.config.get("merge_func", "sum")
+        scaling_factor = self.scaling_factor
+        threshold = self.threshold
+
+        with self.profile("loading models"):
+            # Load the pretrained model
+            pretrained_model = modelpool.load_model("_pretrained_")
+
+            # Load the state dicts of the models
+            ft_checks: List[StateDictType] = [
+                modelpool.load_model(model_name).state_dict(keep_vars=True)
+                for model_name in modelpool.model_names
+            ]
+            ptm_check: StateDictType = pretrained_model.state_dict(keep_vars=True)
+
+        with self.profile("merging models"):
+            # Compute the task vectors
+            flat_ft: Tensor = torch.vstack(
+                [state_dict_to_vector(check, remove_keys) for check in ft_checks]
+            )
+            flat_ptm: Tensor = state_dict_to_vector(ptm_check, remove_keys)
+            tv_flat_checks = flat_ft - flat_ptm
+
+            # Perform TIES Merging
+            merged_tv = ties_merging(
+                tv_flat_checks,
+                reset_thresh=threshold,
+                merge_func=merge_func,
+            )
+            merged_check = flat_ptm + scaling_factor * merged_tv
+     
+
+========== TEST DATASET CFGS ==========
+tasks: ['sun397', 'stanford-cars', 'resisc45', 'eurosat', 'svhn', 'gtsrb', 'mnist', 'dtd']
+
+========== MODELPOOL (merge_and_unload:true) ==========
+pool ok
+taskpool ok
+
+========== TA ALPHA SWEEP ==========
+
+--- TA_a0.1 {'scaling_factor': 0.1} ---
+  eval 1797s
+  TA_a0.1: avg_norm=0.6387 avg_acc=0.5143
+
+--- TA_a0.2 {'scaling_factor': 0.2} ---
+  eval 404s
+  TA_a0.2: avg_norm=0.5661 avg_acc=0.4488
+
+--- TA_a0.3 {'scaling_factor': 0.3} ---
+  eval 389s
+  TA_a0.3: avg_norm=0.4049 avg_acc=0.3162
+
+--- TA_a0.4 {'scaling_factor': 0.4} ---
+  eval 395s
+  TA_a0.4: avg_norm=0.2390 avg_acc=0.1903
+
+========== TIES disjoint-mean ==========
+
+--- TIES_mean_a1.0 {'scaling_factor': 1.0, 'threshold': 20, 'remove_keys': [], 'merge_func': 'mean'} ---
+  eval 401s
+  TIES_mean_a1.0: avg_norm=0.4536 avg_acc=0.3521
+
+--- TIES_mean_a0.3 {'scaling_factor': 0.3, 'threshold': 20, 'remove_keys': [], 'merge_func': 'mean'} ---
+  eval 414s
+  TIES_mean_a0.3: avg_norm=0.6338 avg_acc=0.5104
+
+========== WRITE CSV ==========
+BEST->WORST:
+[
+  {
+    "config": "TA_a0.1",
+    "avg_norm": 0.6387
+  },
+  {
+    "config": "TIES_mean_a0.3",
+    "avg_norm": 0.6338
+  },
+  {
+    "config": "TA_a0.2",
+    "avg_norm": 0.5661
+  },
+  {
+    "config": "TIES_mean_a1.0",
+    "avg_norm": 0.4536
+  },
+  {
+    "config": "TA_a0.3",
+    "avg_norm": 0.4049
+  },
+  {
+    "config": "TA_a0.4",
+    "avg_norm": 0.239
+  }
+]

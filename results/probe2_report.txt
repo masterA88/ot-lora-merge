@@ -1,0 +1,35 @@
+== INSTALL ==
+
+== adapter_config.json for tanganke/clip-vit-base-patch16_sun397_lora-16 ==
+files: ['.gitattributes', 'README.md', 'adapter_config.json', 'adapter_model.safetensors']
+  r = 16
+  lora_alpha = 32
+  target_modules = ['q_proj', 'v_proj']
+  peft_type = LORA
+  base_model_name_or_path = openai/clip-vit-base-patch16
+  use_rslora = False
+  lora_dropout = 0.1
+  fan_in_fan_out = False
+
+== load via PeftModel onto CLIPVisionModel + inspect lora keys ==
+  #lora tensors = 48
+  peft_config keys: ['default']
+  alpha/r = 32 / 16 = 2.0
+  sample keys + shapes:
+     base_model.model.vision_model.encoder.layers.0.self_attn.v_proj.lora_A.default.weight (16, 768)
+     base_model.model.vision_model.encoder.layers.0.self_attn.v_proj.lora_B.default.weight (768, 16)
+     base_model.model.vision_model.encoder.layers.0.self_attn.q_proj.lora_A.default.weight (16, 768)
+     base_model.model.vision_model.encoder.layers.0.self_attn.q_proj.lora_B.default.weight (768, 16)
+     base_model.model.vision_model.encoder.layers.1.self_attn.v_proj.lora_A.default.weight (16, 768)
+     base_model.model.vision_model.encoder.layers.1.self_attn.v_proj.lora_B.default.weight (768, 16)
+  #target Linear layers = 24
+  sample target layer: base_model.model.vision_model.encoder.layers.0.self_attn.q_proj
+
+== also load raw adapter_model.safetensors keys directly (factored, no merge) ==
+  #keys in adapter_model.safetensors = 48
+     base_model.model.encoder.layers.0.self_attn.q_proj.lora_A.weight
+     base_model.model.encoder.layers.0.self_attn.q_proj.lora_B.weight
+     base_model.model.encoder.layers.0.self_attn.v_proj.lora_A.weight
+     base_model.model.encoder.layers.0.self_attn.v_proj.lora_B.weight
+     base_model.model.encoder.layers.1.self_attn.q_proj.lora_A.weight
+     base_model.model.encoder.layers.1.self_attn.q_proj.lora_B.weight

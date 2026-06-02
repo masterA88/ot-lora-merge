@@ -1,0 +1,30 @@
+# Data & checkpoints (never commit)
+data/
+*.ckpt
+*.safetensors
+*.bin
+adapters_cache/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+
+# Experiment logs (commit small CSV/JSON in results/ explicitly)
+wandb/
+*.log
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local-only (not for the repo)
+.claude/
+.tmp/
+.pytest_cache/
+fine_tunning1.txt

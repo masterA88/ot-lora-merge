@@ -1,0 +1,38 @@
+== INSTALL ==
+
+== enumerate collection hoffman-lab/knots-model-merging-with-svd-672d3b5fabf766c22989e760 ==
+title: KnOTS - Model Merging with SVD | #items: 23
+   model hoffman-lab/KnOTS-Llama3_8B_lora_R16_mnli
+   model hoffman-lab/KnOTS-Llama3_8B_lora_R16_snli
+   model hoffman-lab/KnOTS-Llama3_8B_lora_R16_sick
+   model hoffman-lab/KnOTS-Llama3_8B_lora_R16_qnli
+   model hoffman-lab/KnOTS-Llama3_8B_lora_R16_rte
+   model hoffman-lab/KnOTS-Llama3_8B_lora_R16_pretrained_model
+   model hoffman-lab/KnOTS-Llama3_8B_lora_R16_scitail
+   model hoffman-lab/KnOTS-ViT-B-32_lora_R16_stanford_cars
+   model hoffman-lab/KnOTS-ViT-B-32_lora_R16_dtd
+   model hoffman-lab/KnOTS-ViT-B-32_lora_R16_eurosat
+   model hoffman-lab/KnOTS-ViT-B-32_lora_R16_gtsrb
+   model hoffman-lab/KnOTS-ViT-B-32_lora_R16_mnist
+   model hoffman-lab/KnOTS-ViT-B-32_lora_R16_resisc45
+   model hoffman-lab/KnOTS-ViT-B-32_lora_R16_sun397
+   model hoffman-lab/KnOTS-ViT-B-32_lora_R16_svhn
+   model hoffman-lab/KnOTS-ViT-L-14_lora_R16_stanford_cars
+   model hoffman-lab/KnOTS-ViT-L-14_lora_R16_dtd
+   model hoffman-lab/KnOTS-ViT-L-14_lora_R16_eurosat
+   model hoffman-lab/KnOTS-ViT-L-14_lora_R16_gtsrb
+   model hoffman-lab/KnOTS-ViT-L-14_lora_R16_mnist
+   model hoffman-lab/KnOTS-ViT-L-14_lora_R16_resisc45
+   model hoffman-lab/KnOTS-ViT-L-14_lora_R16_sun397
+   model hoffman-lab/KnOTS-ViT-L-14_lora_R16_svhn
+
+== inspect target model: hoffman-lab/KnOTS-ViT-B-32_lora_R16_stanford_cars ==
+files: ['.gitattributes', 'README.md', 'adapter_config.json', 'adapter_model.bin']
+  adapter_config.json:
+    r = 16
+    lora_alpha = 16
+    target_modules = ['q_proj', 'k_proj', 'v_proj', 'out_proj']
+    peft_type = LORA
+    base_model_name_or_path = None
+    use_rslora = None
+    lora_dropout = 0.1

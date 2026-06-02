@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ot-lora-merge"
+version = "0.1.0"
+description = "Merge LoRA adapters via optimal transport in the rank-r subspace (Sinkhorn / Wasserstein barycenter / Gromov-Wasserstein)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Hilmi Nur Ardian" }]
+dependencies = [
+    "numpy>=1.24",
+    "POT>=0.9.5",
+]
+
+[project.optional-dependencies]
+eval = [
+    "torch>=2.2",
+    "transformers>=4.44",
+    "peft>=0.11",
+    "open_clip_torch>=2.24",
+]
+dev = ["pytest>=8.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

@@ -1,0 +1,7 @@
+# M-align: transport each task to an anchor, then combine. Spec §1.5.
+name: ot_lora_align
+mode: align
+cost: paired          # paired | left | right | grassmann
+eps: 0.01             # Sinkhorn entropic reg; set exact=true for EMD
+exact: false
+target_rank: null     # null -> max input rank

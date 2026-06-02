@@ -1,0 +1,484 @@
+
+======== INSTALL ========
+config dir: /usr/local/lib/python3.12/dist-packages/fusion_bench_config exists True
+
+======== 1. HYDRA COMPOSE taskpool=clip-vit-classification_TA8 ========
+Traceback (most recent call last):
+  File "/kaggle/src/script.py", line 20, in <module>
+    cfg=compose(config_name='taskpool/clip-vit-classification_TA8')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/compose.py", line 38, in compose
+    cfg = gh.hydra.compose_config(
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/hydra.py", line 594, in compose_config
+    cfg = self.config_loader.load_configuration(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/config_loader_impl.py", line 142, in load_configuration
+    return self._load_configuration_impl(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/config_loader_impl.py", line 253, in _load_configuration_impl
+    defaults_list = create_defaults_list(
+                    ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 745, in create_defaults_list
+    defaults, tree = _create_defaults_list(
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 715, in _create_defaults_list
+    defaults_tree = _create_defaults_tree(
+                    ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 356, in _create_defaults_tree
+    ret = _create_defaults_tree_impl(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 457, in _create_defaults_tree_impl
+    return _expand_virtual_root(repo, root, overrides, skip_missing)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 280, in _expand_virtual_root
+    subtree = _create_defaults_tree_impl(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 464, in _create_defaults_tree_impl
+    config_not_found_error(repo=repo, tree=root)
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 799, in config_not_found_error
+    raise MissingConfigException(
+hydra.errors.MissingConfigException: Cannot find primary config 'taskpool/clip-vit-classification_TA8'. Check that it's in your config search path.
+
+Config search path:
+	provider=hydra, path=pkg://hydra.conf
+	provider=main, path=file:///usr/local/lib/python3.12/dist-packages/fusion_bench_config
+	provider=schema, path=structured://
+
+
+======== 1b. try compose as taskpool group (overrides style) ========
+Traceback (most recent call last):
+  File "/kaggle/src/script.py", line 32, in <module>
+    cfg2=compose(config_name='taskpool/clip-vit-classification_TA8')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/compose.py", line 38, in compose
+    cfg = gh.hydra.compose_config(
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/hydra.py", line 594, in compose_config
+    cfg = self.config_loader.load_configuration(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/config_loader_impl.py", line 142, in load_configuration
+    return self._load_configuration_impl(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/config_loader_impl.py", line 253, in _load_configuration_impl
+    defaults_list = create_defaults_list(
+                    ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 745, in create_defaults_list
+    defaults, tree = _create_defaults_list(
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 715, in _create_defaults_list
+    defaults_tree = _create_defaults_tree(
+                    ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 356, in _create_defaults_tree
+    ret = _create_defaults_tree_impl(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 457, in _create_defaults_tree_impl
+    return _expand_virtual_root(repo, root, overrides, skip_missing)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 280, in _expand_virtual_root
+    subtree = _create_defaults_tree_impl(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 464, in _create_defaults_tree_impl
+    config_not_found_error(repo=repo, tree=root)
+  File "/usr/local/lib/python3.12/dist-packages/hydra/_internal/defaults_list.py", line 799, in config_not_found_error
+    raise MissingConfigException(
+hydra.errors.MissingConfigException: Cannot find primary config 'taskpool/clip-vit-classification_TA8'. Check that it's in your config search path.
+
+Config search path:
+	provider=hydra, path=pkg://hydra.conf
+	provider=main, path=file:///usr/local/lib/python3.12/dist-packages/fusion_bench_config
+	provider=schema, path=structured://
+
+
+======== 2. SHIPPED METHOD YAMLs (correct default args) ========
+----- method/dare/simple_average.yaml -----
+_target_: fusion_bench.method.DareSimpleAverage
+sparsity_ratio: 0.5
+only_on_linear_weights: false
+rescale: true
+
+----- method/linear/simple_average_for_causallm.yaml -----
+# =============================================================================
+# FusionBench Method Configuration: Simple Average (Causal LM)
+# =============================================================================
+# Uniformly averages causal LM weights with optional backbone-only.
+# =============================================================================
+_target_: fusion_bench.method.SimpleAverageForCausalLM
+# set `merge_backbone` to true if you has a base model and only want to merge the backbone of the experts
+# if `merge_backbone` is False, this is equivalent to `SimpleAverageAlgorithm`
+merge_backbone: false
+model_save_path: ${path.log_dir}/checkpoint
+show_pbar: true
+
+----- method/simple_average.yaml -----
+# =============================================================================
+# FusionBench Method Configuration: Simple Average
+# =============================================================================
+# Equally averages parameters of all models in the model pool.
+#
+# Usage notes
+# - No hyperparameters required; behavior is deterministic given model order.
+# - Ensure models are architecture-compatible (same shapes) before merging.
+# =============================================================================
+_target_: fusion_bench.method.SimpleAverageAlgorithm
+
+----- method/singular_value_calibration/simple_average.yaml -----
+_target_: fusion_bench.method.singular_value_calibration.generic.SingularValueCalibrationWithBaseMethod
+alpha: 0.1
+accelerator: null
+base_method:
+  _target_: fusion_bench.method.SimpleAverageAlgorithm
+
+----- method/concrete_subspace/clip_concrete_task_arithmetic.yaml -----
+name: clip_concrete_task_arithmetic
+# batch size per gpu
+# if you have multiple gpus, the total batch size will be `batch_size * num_gpus`
+batch_size: 16
+num_workers: 8
+merge_dtype: null
+optimizer: adam
+lr: 1e-3
+scaling_factor: 0.3
+max_steps: 2000
+save_interval: 500
+initial_logits: 0
+temperature: 0.5
+# "discrete" or "continuous", this is the mask applied for evaluation, not during training
+# the performance of final model are expected to be similar
+eval_mask_type: continuous
+mask_checkpoint: null
+# if `clamp_weights` is true, the weights will be clamped to [0, 1]
+clamp_weights: false
+# arguments of `functional_call`
+tie_weights: true
+strict: false
+# directory to cache zero-shot classication heads
+cache_dir: outputs
+skip_training: false
+
+----- method/concrete_subspace/clip_safe_concrete_task_arithmetic.yaml -----
+# Reference: Jinluan Yang, et al. Mitigating the Backdoor Effect for Multi-Task Model Merging via Safety-Aware Subspace. ICLR 2025.
+name: clip_safe_concrete_task_arithmetic
+# batch size per gpu
+# if you have multiple gpus, the total batch size will be `batch_size * num_gpus`
+batch_size: 16
+num_workers: 8
+optimizer: adam
+lr: 1e-3
+scaling_factor: 0.3
+###new
+adv_lr: 1e-4
+trigger_norm: 1000
+adv_weight: 0.1
+max_steps: 2000
+save_interval: 500
+initial_logits: 0
+temperature: 0.5
+# "discrete" or "continuous", this is the mask applied for evaluation, not during training
+# the performance of final model are expected to be similar
+eval_mask_type: continuous
+mask_checkpoint: null
+# if `clamp_weights` is true, the weights will be clamped to [0, 1]
+clamp_weights: false
+# arguments of `functional_call`
+tie_weights: true
+strict: false
+cache_dir: outputs
+
+----- method/dare/task_arithmetic.yaml -----
+_target_: fusion_bench.method.DareTaskArithmetic
+scaling_factor: 0.3
+sparsity_ratio: 0.5
+only_on_linear_weights: false
+rescale: true
+
+----- method/linear/task_arithmetic_for_causallm.yaml -----
+# =============================================================================
+# FusionBench Method Configuration: Task Arithmetic (Causal LM)
+# =============================================================================
+_target_: fusion_bench.method.TaskArithmeticForCausalLM
+scaling_factor: 0.3
+merge_backbone: false
+model_save_path: ${path.log_dir}/checkpoint
+
+----- method/opcm/task_arithmetic.yaml -----
+# =============================================================================
+# FusionBench Method Configuration: Continual Task Arithmetic
+# =============================================================================
+# Applies task arithmetic incrementally across a stream of models.
+# Maintains per-step save/eval similar to OPCM.
+# =============================================================================
+_target_: fusion_bench.method.opcm.task_arithmetic.ContinualTaskArithmeticForCLIP
+scaling_factor: 0.3
+# shuffle the order of the models
+shuffle_order: true
+# the random seed to use
+seed: null
+# save the merged model on every step
+save_on_every_step: true
+# evaluate the merged model on every step
+evaluate_on_every_step: true
+
+----- method/randes/superposed_task_arithmetic.yaml -----
+name: superposed_task_arithmetic
+#* === base randes options ===
+mode: random_binary_diagonal_matrix
+# weights for all mlp and attn layers
+target_layer: 
+  - mlp_w
+  - attn_w
+random_seed: 42 # for random_binary_diagonal_matrix
+different_across_layers: True
+joint_matrix_mode: flatten_hstack
+rank: 1 # for columnwise svd
+random_components: False
+shift_layers: 0
+debug: 0
+verbose: 0
+dropout_rate: 1
+#* === task arithmetic options ===
+scaling_factor: 0.5
+# path to save/load the model
+model_path: null
+
+----- method/randes/superposed_task_arithmetic_lora.yaml -----
+_target_: fusion_bench.method.randes.SuperposedTaskArithmeticLoRAAlgorithm
+#* === base randes options ===
+mode: random_binary_diagonal_matrix
+# weights for all mlp and attn layers
+target_layer:
+  - mlp_w
+  - attn_w
+random_seed: 42 # for random_binary_diagonal_matrix
+different_across_layers: True
+joint_matrix_mode: flatten_hstack
+rank: 1 # for columnwise svd
+random_components: False
+shift_layers: 0
+debug: 0
+verbose: 0
+dropout_rate: 1
+#* === task arithmetic options ===
+scaling_factor: 0.5
+# path to save/load the model
+model_path: null
+
+----- method/singular_value_calibration/dare_task_arithmetic.yaml -----
+_target_: fusion_bench.method.singular_value_calibration.generic.SingularValueCalibrationWithBaseMethod
+alpha: 0.1
+accelerator: null
+base_method:
+  _target_: fusion_bench.method.DareTaskArithmetic
+  scaling_factor: 0.3
+  sparsity_ratio: 0.5
+  only_on_linear_weights: false
+  rescale: true
+
+----- method/singular_value_calibration/task_arithmetic.yaml -----
+_target_: fusion_bench.method.singular_value_calibration.task_arithmetic.SingularValueCalibrationArithmeticTask
+scaling_factor: 0.3
+alpha: 0.1
+accelerator: null
+
+----- method/tall_mask/task_arithmetic.yaml -----
+_target_: fusion_bench.method.tall_mask.TallMaskTaskArithmeticAlgorithm
+tall_mask_lambda: 0.6
+debug: 0
+verbose: 0
+
+----- method/task_arithmetic.yaml -----
+# =============================================================================
+# FusionBench Method Configuration: Task Arithmetic
+# =============================================================================
+# Performs task vector arithmetic: base + lambda * \sum_i (task_i - base).
+#
+# Notes
+# - scaling_factor controls the contribution of the task delta.
+# - Model compatibility is required (matching parameter shapes).
+# =============================================================================
+_target_: fusion_bench.method.TaskArithmeticAlgorithm
+scaling_factor: 0.3
+
+----- method/trust_region/clip_task_arithmetic.yaml -----
+_target_: fusion_bench.method.trust_region.clip_task_arithmetic.TaskArithmeticWithTrustRegionForCLIP
+scaling_factor: 0.3
+threshold_quantile: 0.99
+max_samples: 128
+batch_size: 128
+zero_shot: false
+
+----- method/dare/ties_merging.yaml -----
+_target_: fusion_bench.method.dare.DareTiesMerging
+# === DARE parameters ===
+sparsity_ratio: 0.5
+only_on_linear_weights: false
+rescale: true
+# === Ties merging parameters ===
+# Scaling factor $\lambda$
+scaling_factor: 0.5
+threshold: 20
+# List of keys to remove from the state dict, default is empty
+remove_keys: []
+# Function to merge the models, default is sum. Options are 'sum', 'mean', and 'max'
+merge_func: sum
+
+----- method/linear/ties_merging_for_causallm.yaml -----
+# =============================================================================
+# FusionBench Method Configuration: TIES Merging (Causal LM)
+# =============================================================================
+# TIES merging adapted for causal language models with optional backbone-only.
+# =============================================================================
+_target_: fusion_bench.method.TiesMergingForCausalLM
+# Scaling factor $\lambda$ 
+scaling_factor: 0.3
+# Threshold for resetting values in the task vector
+threshold: 20
+# List of keys to remove from the state dict, default is empty
+remove_keys: []
+# Function to merge the models, default is sum. Options are 'sum', 'mean', and 'max'
+merge_func: sum
+# Whether to merge only the backbone layers
+merge_backbone: false
+# Path to save the merged model
+model_save_path: ${path.log_dir}/checkpoint
+
+----- method/opcm/ties_merging.yaml -----
+# =============================================================================
+# FusionBench Method Configuration: Continual TIES Merging
+# =============================================================================
+# Continual variant of TIES merging with per-step save/eval instrumentation.
+# =============================================================================
+_target_: fusion_bench.method.opcm.ties_merging.ContinualTiesMergingForCLIP
+# Scaling factor $\lambda$
+scaling_factor: 0.5
+threshold: 20
+# List of keys to remove from the state dict, default is empty
+remove_keys: []
+# Function to merge the models, default is sum. Options are 'sum', 'mean', and 'max'
+merge_func: sum
+# shuffle the order of the models
+shuffle_order: true
+# the random seed to use
+seed: null
+# save the merged model on every step
+save_on_every_step: true
+# evaluate the merged model on every step
+evaluate_on_every_step: true
+
+----- method/singular_value_calibration/ties_merging.yaml -----
+_target_: fusion_bench.method.singular_value_calibration.generic.SingularValueCalibrationWithBaseMethod
+alpha: 0.1
+accelerator: null
+base_method:
+  _target_: fusion_bench.method.TiesMergingAlgorithm
+  scaling_factor: 0.3
+  threshold: 20
+  remove_keys: []
+  merge_func: sum
+
+----- method/ties_merging.yaml -----
+# =============================================================================
+# FusionBench Method Configuration: Ties Merging
+# =============================================================================
+_target_: fusion_bench.method.TiesMergingAlgorithm
+# Scaling factor $\lambda$
+scaling_factor: 0.3
+threshold: 20
+# List of keys to remove from the state dict, default is empty
+remove_keys: []
+# Function to merge the models, default is sum. Options are 'sum', 'mean', and 'max'
+merge_func: sum
+
+
+======== 3. CONSTRUCTOR SIGNATURES ========
+SimpleAverageAlgorithm.__init__ (self, show_pbar: bool = False, inplace: bool = True, **kwargs)
+TaskArithmeticAlgorithm.__init__ (self, scaling_factor: float, inplace: bool = True, **kwargs)
+TiesMergingAlgorithm.__init__ (self, scaling_factor: float, threshold: float, remove_keys: List[str], merge_func: Literal['sum', 'mean', 'max'], **kwargs: Any)
+CLIPVisionModelTaskPool.__init__ (self, test_datasets: Union[omegaconf.dictconfig.DictConfig, Dict[str, torch.utils.data.dataset.Dataset]], *, processor: Union[str, omegaconf.dictconfig.DictConfig, transformers.models.clip.processing_clip.CLIPProcessor], clip_model: Union[str, omegaconf.dictconfig.DictConfig, transformers.models.clip.modeling_clip.CLIPModel], data_processor: Union[omegaconf.dictconfig.DictConfig, transformers.models.clip.processing_clip.CLIPProcessor] = None, dataloader_kwargs: omegaconf.dictconfig.DictConfig = None, layer_wise_feature_save_path: Optional[str] = None, layer_wise_feature_first_token_only: bool = True, layer_wise_feature_max_num: Optional[int] = None, fast_dev_run: Optional[bool] = None, move_to_device: bool = True, **kwargs)
+
+======== 4. ONE dataset test yaml (to see _target_) ========
+----- dataset/image_classification/test/mnist.yaml -----
+mnist:
+  _target_: datasets.load_dataset
+  path: mnist
+  split: test
+
+----- dataset/image_classification/train/mnist.yaml -----
+mnist:
+  _target_: datasets.load_dataset
+  path: mnist
+  split: train
+
+----- dataset/image_classification/val/mnist.yaml -----
+mnist:
+  _target_: fusion_bench.utils.data.train_validation_split
+  dataset:
+    _target_: datasets.load_dataset
+    path: mnist
+    split: train
+  validation_fraction: 0.1
+  validation_size: null
+  random_seed: 0
+  return_split: val
+
+
+======== 5. taskpool _template yaml ========
+----- taskpool/CLIPVisionModelTaskPool/_template.yaml -----
+# Usage:
+#
+# defaults:
+#   - CLIPVisionModelTaskPool@: _template
+_target_: fusion_bench.taskpool.CLIPVisionModelTaskPool
+_recursive_: false
+test_datasets: ??? # The datasets to evaluate the model on
+base_model: openai/clip-vit-base-patch32
+clip_model:
+  _target_: transformers.CLIPModel.from_pretrained
+  pretrained_model_name_or_path: ${..base_model} # The base model to use
+processor:
+  _target_: transformers.CLIPProcessor.from_pretrained
+  pretrained_model_name_or_path: ${..base_model} # The base model to use
+data_processor: ${.processor}
+dataloader_kwargs:
+  batch_size: 128 # The batch size for the data loader
+  num_workers: 8 # The number of worker processes for data loading
+  pin_memory: True # Whether to pin memory in data loader
+  drop_last: False # Whether to drop the last incomplete batch
+  shuffle: False # Whether to shuffle the data
+# === layer-wise feature saving ===
+# The path to save the features to, if none then the features are not saved
+# This is the path to a directory, the features of task `task_name` will be saved in `feature_save_path/task_name.csv`
+layer_wise_feature_save_path: null
+layer_wise_feature_first_token_only: true # Whether to save only the first token of the features
+# The maximum number of samples to save the features for
+layer_wise_feature_max_num: 1000
+
+----- taskpool/CLIPVisionModelTaskPool/_template.yaml -----
+# Usage:
+#
+# defaults:
+#   - CLIPVisionModelTaskPool@: _template
+_target_: fusion_bench.taskpool.CLIPVisionModelTaskPool
+_recursive_: false
+test_datasets: ??? # The datasets to evaluate the model on
+base_model: openai/clip-vit-base-patch32
+clip_model:
+  _target_: transformers.CLIPModel.from_pretrained
+  pretrained_model_name_or_path: ${..base_model} # The base model to use
+processor:
+  _target_: transformers.CLIPProcessor.from_pretrained
+  pretrained_model_name_or_path: ${..base_model} # The base model to use
+data_processor: ${.processor}
+dataloader_kwargs:
+  batch_size: 128 # The batch size for the data loader
+  num_workers: 8 # The number of worker processes for data loading
+  pin_memory: True # Whether to pin memory in data loader
+  drop_last: False # Whether to drop the last incomplete batch
+  shuffle: False # Whether to shuffle the data
+# === layer-wise feature saving ===
+# The path to save the features to, if none then the features are not saved
+# This is the path to a directory, the features of task `task_name` will be saved in `feature_save_path/task_name.csv`
+layer_wise_feature_save_path: null
+layer_wise_feature_first_token_only: true # Whether to save only the first token of the features
+# The maximum number of samples to save the features for
+layer_wise_feature_max_num: 1000

@@ -1,0 +1,96 @@
+# 8-task CLIP-ViT-B/32 LoRA modelpool — KnOTS-lineage adapters (the published-bar specialists).
+# _target_ required by fusion_bench.modelpool.BaseModelPool.from_yaml() (v0.2.x).
+#
+# WHY KnOTS B/32 (not FusionBench's bundled B/16): the published bar — GeoMerge 77.10%,
+# Core-Space 76.43%, KnOTS 74.02% — is measured on THESE adapters. Using them keeps our
+# numbers directly comparable. (FusionBench's bundled LoRA pool is B/16, a different backbone;
+# tanganke/clip-vit-base-patch32_*_lora repos do not exist.)
+#
+# Adapter facts VERIFIED on Kaggle 2026-06-01 (scripts/kaggle_probe.py probe3 ->
+# results/probe3_report.txt): r=16, alpha=16 (scale 1.0), target_modules=[q,k,v,out]_proj,
+# base_model_name_or_path=null (we pass it), weights = adapter_model.bin.
+# HF collection: hoffman-lab/knots-model-merging-with-svd-672d3b5fabf766c22989e760
+
+_target_: fusion_bench.modelpool.CLIPVisionModelPool
+_recursive_: false
+
+# Base model — KnOTS adapters carry null base_model_name_or_path, so we supply it explicitly.
+models:
+  _pretrained_:
+    _target_: fusion_bench.models.linearized.vision_model.load_fft_vision_model_hf
+    model_name: openai/clip-vit-base-patch32
+    return_vision_model: false
+
+  # LoRA specialists. merge_and_unload: false so fusionbench_hook.run() receives unmerged
+  # PeftModels and peft_io.peft_model_to_layers() can read lora_A/lora_B for the OT merge.
+  # CONFIRMED-IN-KAGGLE 2026-06-01 (probe4 -> results/probe4_report.txt): FusionBench's
+  #   load_lora_vision_model_hf(base, peft_name, merge_and_unload=False) loads these KnOTS
+  #   adapters NATIVELY (no shim needed) -> PeftModel; peft_io extracts 48 layers
+  #   (12 x {q,k,v,out}_proj), each A=(16,768) B=(768,16) scale 1.0. Signature also has
+  #   return_vision_model=True default.
+  sun397:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch32
+    peft_name: hoffman-lab/KnOTS-ViT-B-32_lora_R16_sun397
+    merge_and_unload: false
+    return_vision_model: true
+
+  stanford-cars:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch32
+    peft_name: hoffman-lab/KnOTS-ViT-B-32_lora_R16_stanford_cars
+    merge_and_unload: false
+    return_vision_model: true
+
+  resisc45:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch32
+    peft_name: hoffman-lab/KnOTS-ViT-B-32_lora_R16_resisc45
+    merge_and_unload: false
+    return_vision_model: true
+
+  eurosat:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch32
+    peft_name: hoffman-lab/KnOTS-ViT-B-32_lora_R16_eurosat
+    merge_and_unload: false
+    return_vision_model: true
+
+  svhn:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch32
+    peft_name: hoffman-lab/KnOTS-ViT-B-32_lora_R16_svhn
+    merge_and_unload: false
+    return_vision_model: true
+
+  gtsrb:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch32
+    peft_name: hoffman-lab/KnOTS-ViT-B-32_lora_R16_gtsrb
+    merge_and_unload: false
+    return_vision_model: true
+
+  mnist:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch32
+    peft_name: hoffman-lab/KnOTS-ViT-B-32_lora_R16_mnist
+    merge_and_unload: false
+    return_vision_model: true
+
+  dtd:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch32
+    peft_name: hoffman-lab/KnOTS-ViT-B-32_lora_R16_dtd
+    merge_and_unload: false
+    return_vision_model: true
+
+# Processor for the taskpool (shared for all tasks)
+processor:
+  _target_: transformers.CLIPProcessor.from_pretrained
+  pretrained_model_name_or_path: openai/clip-vit-base-patch32
+
+# LoRA rank of the released KnOTS adapters (r=16, alpha=16 -> scale 1.0).
+# Rank ablation {8,32,64} requires self-training (KnOTS releases r=16 only);
+# match KnOTS config (target q/k/v/out_proj, alpha=r) so ablated ranks stay comparable.
+lora:
+  default_rank: 16

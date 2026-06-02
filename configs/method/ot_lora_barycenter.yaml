@@ -1,0 +1,8 @@
+# M-bary: free-support Wasserstein barycenter of the T direction distributions. Spec §1.5 (headline).
+name: ot_lora_barycenter
+mode: barycenter
+cost: paired
+eps: 0.01
+exact: false
+target_rank: null
+max_iter: 20

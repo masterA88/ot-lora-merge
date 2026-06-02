@@ -1,0 +1,23 @@
+
+======== INSTALL ========
+
+======== A. load_lora_vision_model_hf signature ========
+signature: (base_model_name: str, peft_name: str, merge_and_unload: bool = False, return_vision_model=True) -> peft.peft_model.PeftModel
+
+======== B. FusionBench load_lora_vision_model_hf(base, KnOTS, merge_and_unload=False) ========
+OK with kwargs ['base_model_name', 'peft_name', 'merge_and_unload'] -> type PeftModel
+
+======== C. fallback shim PeftModel.from_pretrained(CLIPVisionModel, KnOTS) ========
+shim OK -> type PeftModel | peft_config keys ['default']
+  r= 16  alpha= 16  scale= 1.0  target= {'out_proj', 'q_proj', 'k_proj', 'v_proj'}
+
+======== D. peft_io parse of the KnOTS adapter state_dict ========
+#layers extracted = 48
+  module-type counts: {'k_proj': 12, 'out_proj': 12, 'q_proj': 12, 'v_proj': 12}
+    encoder.layers.0.self_attn.k_proj | A (16, 768) B (768, 16) scale 1.0
+    encoder.layers.0.self_attn.out_proj | A (16, 768) B (768, 16) scale 1.0
+    encoder.layers.0.self_attn.q_proj | A (16, 768) B (768, 16) scale 1.0
+    encoder.layers.0.self_attn.v_proj | A (16, 768) B (768, 16) scale 1.0
+    encoder.layers.1.self_attn.k_proj | A (16, 768) B (768, 16) scale 1.0
+    encoder.layers.1.self_attn.out_proj | A (16, 768) B (768, 16) scale 1.0
+  shape check: A=(r,d)= (16, 768)  B=(d,r)= (768, 16)  r match: True  d match: True

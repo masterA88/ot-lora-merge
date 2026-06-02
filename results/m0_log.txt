@@ -1,0 +1,83 @@
+
+========== INSTALL torch 2.6.0+cu124 ==========
+torch 2.6.0+cu124 cuda True Tesla P100-PCIE-16GB
+CUDA OK
+
+========== TEST DATASET CFGS ==========
+test_ds tasks: ['sun397', 'stanford-cars', 'resisc45', 'eurosat', 'svhn', 'gtsrb', 'mnist', 'dtd']
+
+========== LOAD MODELPOOL (merge_and_unload: true) ==========
+model_names = ['sun397', 'stanford-cars', 'resisc45', 'eurosat', 'svhn', 'gtsrb', 'mnist', 'dtd']
+
+========== BUILD FULL TASKPOOL ==========
+ok
+
+========== BASELINES ==========
+
+--- simple_average {} ---
+  merged in 28.2s
+  evaluated in 857s
+  simple_average: avg_norm_acc=0.6364 avg_acc=0.5128
+  per-task: {"sun397": 0.622972309589386, "stanford-cars": 0.6093769669532776, "resisc45": 0.6284127235412598, "eurosat": 0.4551851749420166, "svhn": 0.42682084441185, "gtsrb": 0.4050672948360443, "mnist": 0.531000018119812, "dtd": 0.4239361584186554, "average": 0.5128464363515377}
+  per-task norm: {"sun397": 0.9596, "stanford-cars": 0.8227, "resisc45": 0.7095, "eurosat": 0.4569, "svhn": 0.4425, "gtsrb": 0.4354, "mnist": 0.534, "dtd": 0.7305}
+
+--- task_arithmetic {'scaling_factor': 0.3} ---
+  merged in 16.5s
+  evaluated in 380s
+  task_arithmetic: avg_norm_acc=0.4049 avg_acc=0.3162
+  per-task: {"sun397": 0.4987909197807312, "stanford-cars": 0.4765576422214508, "resisc45": 0.29603174328804016, "eurosat": 0.17814815044403076, "svhn": 0.3886754810810089, "gtsrb": 0.09992082417011261, "mnist": 0.30079999566078186, "dtd": 0.2909574508666992, "average": 0.31623527593910694}
+  per-task norm: {"sun397": 0.7683, "stanford-cars": 0.6434, "resisc45": 0.3342, "eurosat": 0.1788, "svhn": 0.403, "gtsrb": 0.1074, "mnist": 0.3025, "dtd": 0.5014}
+
+--- ties {'scaling_factor': 0.3, 'threshold': 20, 'remove_keys': [], 'merge_func': 'sum'} ---
+  merged in 43.3s
+  evaluated in 395s
+  ties: avg_norm_acc=0.3247 avg_acc=0.2532
+  per-task: {"sun397": 0.4103778302669525, "stanford-cars": 0.3978360891342163, "resisc45": 0.16555555164813995, "eurosat": 0.17629629373550415, "svhn": 0.34803318977355957, "gtsrb": 0.08812351524829865, "mnist": 0.20630000531673431, "dtd": 0.2329787164926529, "average": 0.2531876489520073}
+  per-task norm: {"sun397": 0.6321, "stanford-cars": 0.5371, "resisc45": 0.1869, "eurosat": 0.177, "svhn": 0.3608, "gtsrb": 0.0947, "mnist": 0.2075, "dtd": 0.4015}
+
+========== WRITE CSV ==========
+wrote m0_baselines.csv
+[
+  {
+    "method": "simple_average",
+    "avg_norm_acc": 0.6364,
+    "avg_acc": 0.5128,
+    "sun397": 0.623,
+    "stanford-cars": 0.6094,
+    "resisc45": 0.6284,
+    "eurosat": 0.4552,
+    "svhn": 0.4268,
+    "gtsrb": 0.4051,
+    "mnist": 0.531,
+    "dtd": 0.4239,
+    "average": 0.5128
+  },
+  {
+    "method": "task_arithmetic",
+    "avg_norm_acc": 0.4049,
+    "avg_acc": 0.3162,
+    "sun397": 0.4988,
+    "stanford-cars": 0.4766,
+    "resisc45": 0.296,
+    "eurosat": 0.1781,
+    "svhn": 0.3887,
+    "gtsrb": 0.0999,
+    "mnist": 0.3008,
+    "dtd": 0.291,
+    "average": 0.3162
+  },
+  {
+    "method": "ties",
+    "avg_norm_acc": 0.3247,
+    "avg_acc": 0.2532,
+    "sun397": 0.4104,
+    "stanford-cars": 0.3978,
+    "resisc45": 0.1656,
+    "eurosat": 0.1763,
+    "svhn": 0.348,
+    "gtsrb": 0.0881,
+    "mnist": 0.2063,
+    "dtd": 0.233,
+    "average": 0.2532
+  }
+]

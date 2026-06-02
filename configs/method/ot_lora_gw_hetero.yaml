@@ -1,0 +1,5 @@
+# Heterogeneous-rank merge via Gromov-Wasserstein. Spec §1.6 (the structural carve-out).
+name: ot_lora_gw_hetero
+mode: gw
+gw_eps: 0.05
+target_rank: 64       # merge a zoo of mixed ranks {8,16,32,64} into R=64

@@ -1,0 +1,123 @@
+
+======== INSTALL ========
+
+======== 1. FusionBench API imports (the names DEA wired) ========
+fusion_bench version: ?
+  [OK ] fusion_bench.method.base_algorithm.BaseAlgorithm
+  [OK ] fusion_bench.modelpool.CLIPVisionModelPool
+  [OK ] fusion_bench.modelpool.base_pool.BaseModelPool
+  [OK ] fusion_bench.taskpool.clip_vision.CLIPVisionModelTaskPool
+  [OK ] fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+  [OK ] fusion_bench.models.linearized.vision_model.load_fft_vision_model_hf
+  [OK ] fusion_bench.method.simple_average.SimpleAverageAlgorithm
+  [OK ] fusion_bench.method.task_arithmetic.TaskArithmeticAlgorithm
+  [OK ] fusion_bench.method.ties_merging.TiesMergingAlgorithm
+
+======== 2. FusionBench bundled TA8-LoRA modelpool config (authoritative adapter IDs + rank) ========
+candidate config files:
+    /usr/local/lib/python3.12/dist-packages/fusion_bench_config/modelpool/CLIPVisionModelPool/clip-vit-base-patch16_TA8_lora.yaml
+    /usr/local/lib/python3.12/dist-packages/fusion_bench_config/modelpool/CLIPVisionModelPool/clip-vit-base-patch16_individual_lora.yaml
+    /usr/local/lib/python3.12/dist-packages/fusion_bench_config/modelpool/Seq2SeqLMPool/flan-t5-base_glue_lora16.yaml
+    /usr/local/lib/python3.12/dist-packages/fusion_bench_config/modelpool/Seq2SeqLMPool/flan-t5-base_glue_lora16_tta.yaml
+    /usr/local/lib/python3.12/dist-packages/fusion_bench_config/modelpool/Seq2SeqLMPool/flan-t5-large_glue_lora16.yaml
+
+----- /usr/local/lib/python3.12/dist-packages/fusion_bench_config/modelpool/CLIPVisionModelPool/clip-vit-base-patch16_TA8_lora.yaml -----
+_target_: fusion_bench.modelpool.CLIPVisionModelPool
+models:
+  _pretrained_:
+    _target_: fusion_bench.models.linearized.vision_model.load_fft_vision_model_hf
+    model_name: openai/clip-vit-base-patch16
+  sun397:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch16
+    peft_name: tanganke/clip-vit-base-patch16_sun397_lora-16
+    merge_and_unload: true
+  stanford-cars:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch16
+    peft_name: tanganke/clip-vit-base-patch16_stanford-cars_lora-16
+    merge_and_unload: true
+  resisc45:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch16
+    peft_name: tanganke/clip-vit-base-patch16_resisc45_lora-16
+    merge_and_unload: true
+  eurosat:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch16
+    peft_name: tanganke/clip-vit-base-patch16_eurosat_lora-16
+    merge_and_unload: true
+  svhn:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch16
+    peft_name: tanganke/clip-vit-base-patch16_svhn_lora-16
+    merge_and_unload: true
+  gtsrb:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch16
+    peft_name: tanganke/clip-vit-base-patch16_gtsrb_lora-16
+    merge_and_unload: true
+  mnist:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch16
+    peft_name: tanganke/clip-vit-base-patch16_mnist_lora-16
+    merge_and_unload: true
+  dtd:
+    _target_: fusion_bench.models.linearized.vision_model.load_lora_vision_model_hf
+    base_model_name: openai/clip-vit-base-patch16
+    peft_name: tanganke/clip-vit-base-patch16_dtd_lora-16
+    merge_and_unload: true
+processor:
+  _target_: transformers.CLIPProcessor.from_pretrained
+  pretrained_model_name_or_path: openai/clip-vit-base-patch16
+train_datasets: null
+test_datasets: null
+
+
+======== 3. Load a tanganke CLIP-ViT-B/32 LoRA adapter from HF (existence + rank + PEFT keys) ========
+  [NOT FOUND] tanganke/clip-vit-base-patch32_sun397_lora-16 -> RepositoryNotFoundError: 401 Client Error. (Request ID: Root=1-6a1ded6b-6efac56d40e5faf2526df11a;22a37769-672e-4e92-8278-63e49b8347a9)
+
+Repositor
+  [EXISTS] tanganke/clip-vit-base-patch32_sun397  files=['.gitattributes', 'README.md', 'config.json', 'model.safetensors']
+  [NOT FOUND] tanganke/clip-vit-base-patch32_sun397_lora -> RepositoryNotFoundError: 401 Client Error. (Request ID: Root=1-6a1ded6b-2006db9736d12bad299917bb;fe3cf595-2f56-4222-8be2-06bc366a9a53)
+
+Repositor
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_http.py", line 761, in hf_raise_for_status
+    response.raise_for_status()
+  File "/usr/local/lib/python3.12/dist-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '404 Not Found' for url 'https://huggingface.co/tanganke/clip-vit-base-patch32_sun397/resolve/main/adapter_config.json'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/kaggle/src/script.py", line 90, in <module>
+    cfgp = hf_hub_download(found, "adapter_config.json")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_validators.py", line 88, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py", line 997, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py", line 1072, in _hf_hub_download_to_cache_dir
+    (url_to_download, etag, commit_hash, expected_size, xet_file_data, head_call_error) = _get_metadata_or_catch_error(
+                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py", line 1669, in _get_metadata_or_catch_error
+    metadata = get_hf_file_metadata(
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_validators.py", line 88, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py", line 1591, in get_hf_file_metadata
+    response = _httpx_follow_relative_redirects_with_backoff(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_http.py", line 692, in _httpx_follow_relative_redirects_with_backoff
+    hf_raise_for_status(response)
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_http.py", line 787, in hf_raise_for_status
+    raise entry_err from e
+huggingface_hub.errors.RemoteEntryNotFoundError: 404 Client Error. (Request ID: Root=1-6a1ded6b-03d60b8710cc56f274fbbc88;9c2ee8d9-db19-47b9-a18c-2269d65a4fde)
+
+Entry Not Found for url: https://huggingface.co/tanganke/clip-vit-base-patch32_sun397/resolve/main/adapter_config.json.

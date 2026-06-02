@@ -1,0 +1,16 @@
+# Core OT method (CPU-testable, no GPU needed)
+numpy==1.26.4
+POT==0.9.6            # Sinkhorn + Gromov-Wasserstein + free-support barycenter
+
+# Model / merge / eval stack (GPU eval only)
+torch>=2.2,<2.6
+transformers>=4.44,<4.50
+peft>=0.11,<0.14
+open_clip_torch>=2.24
+# fusion_bench provides the 8-task ViT-B/32 modelpool + built-in baselines + eval harness.
+# Install from source for the latest baselines (KnOTS/Core-Space):
+#   pip install git+https://github.com/tanganke/fusion_bench.git
+fusion_bench>=0.2 ; python_version >= "3.9"
+
+# Dev
+pytest>=8.0
