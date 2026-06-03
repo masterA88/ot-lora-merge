@@ -34,23 +34,28 @@ eval harness + built-in baselines and load the KnOTS B/32 adapters into it.)
 
 | Method | avg-norm-acc (8-task ViT-B/32 LoRA) |
 |---|---|
-| GeoMerge (SOTA reference) | 77.10% |
-| Core Space (primary head-to-head) | ~76.43% |
-| KnOTS-TIES | 74.02% |
+| GeoMerge (reported) | 77.10% |
+| Core Space (reported) | ~76.43% |
+| KnOTS-TIES (reported, full method) | 74.02% |
+| **OT-TIES (ours, λ=0.7 keep=0.2)** | **70.79%** |
+| svd-TIES (our KnOTS-style control, left-basis) | 68.7% |
 | **— naive baseline floor (reproduced by us, M0) —** | |
 | Task-Arithmetic (α=0.1) | 63.9% (ours) ≈ 63.78% published ✓ |
 | Simple average | 63.6% (ours) |
 | TIES (disjoint-mean, α=0.3) | 63.4% (ours) |
 
-Our M0 reproduces the published Task-Arithmetic baseline within 0.1% (harness validated; see
-`results/m0_results.md`). The naive baselines floor at ~64%; the target to beat is the advanced
-methods (KnOTS/Core-Space/GeoMerge, 74–77%).
+**Result (M1–M2, see `results/m2_results.md`).** Merging by OT *averaging* (Wasserstein barycenter)
+plateaus at the naive floor — averaging blurs, it does not resolve sign interference. The win comes
+from **TIES interference-resolution inside a shared subspace**, and our contribution is that an
+**OT-chosen subspace beats the SVD-chosen one (KnOTS-style) under identical TIES, at every scaling**
+(+0.7…+1.9%). M0 reproduces published Task-Arithmetic within 0.1% (harness validated).
 
 ## Status
 
-Research repo. The CPU-testable OT core (`src/ot_lora_merge/`) is implemented and unit-tested. The
-GPU evaluation harness wraps **FusionBench** (apples-to-apples baselines + eval). See
-`experiments/` for the milestone runners and `experiment-spec.md`-derived plan below.
+Research repo. CPU OT core + the headline **OT-TIES** merge (`ot_lora_merge.ot_ties_model`) implemented
+and unit-tested (17/17). GPU eval harness wraps **FusionBench** (apples-to-apples baselines + eval).
+M0 (baselines) and M1–M2 (our method + ablations) are run and recorded in `results/`. Remaining:
+M3 heterogeneous-rank Gromov-Wasserstein carve-out; write-up.
 
 ## Install
 

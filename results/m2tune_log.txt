@@ -1,0 +1,71 @@
+
+========== INSTALL ==========
+torch 2.6.0+cu124 Tesla P100-PCIE-16GB
+CUDA OK
+
+========== taskpool ==========
+taskpool ok
+
+========== load adapters + precompute bases (left+right, svd+ot) ==========
+precomputed 48 layers in 265s
+
+========== 1-SIDED lam sweep (keep0.2) ==========
+  svd_1side_lam0.3: avg_norm=0.6584 avg_acc=0.5321 (eval 935s)
+  ot_1side_lam0.3: avg_norm=0.6648 avg_acc=0.5383 (eval 431s)
+  svd_1side_lam0.4: avg_norm=0.6716 avg_acc=0.5453 (eval 410s)
+  ot_1side_lam0.4: avg_norm=0.6824 avg_acc=0.5553 (eval 415s)
+  svd_1side_lam0.5: avg_norm=0.6822 avg_acc=0.5564 (eval 412s)
+  ot_1side_lam0.5: avg_norm=0.6958 avg_acc=0.5689 (eval 409s)
+  svd_1side_lam0.6: avg_norm=0.6873 avg_acc=0.5617 (eval 411s)
+  ot_1side_lam0.6: avg_norm=0.7064 avg_acc=0.5799 (eval 419s)
+
+========== 2-SIDED (full KnOTS-style) lam0.5 keep0.2 ==========
+  svd_2side_lam0.5: avg_norm=0.6803 avg_acc=0.5524 (eval 428s)
+  ot_2side_lam0.5: avg_norm=0.6536 avg_acc=0.5274 (eval 418s)
+
+========== WRITE CSV ==========
+BEST->WORST:
+[
+  {
+    "config": "ot_1side_lam0.6",
+    "avg_norm": 0.7064
+  },
+  {
+    "config": "ot_1side_lam0.5",
+    "avg_norm": 0.6958
+  },
+  {
+    "config": "svd_1side_lam0.6",
+    "avg_norm": 0.6873
+  },
+  {
+    "config": "ot_1side_lam0.4",
+    "avg_norm": 0.6824
+  },
+  {
+    "config": "svd_1side_lam0.5",
+    "avg_norm": 0.6822
+  },
+  {
+    "config": "svd_2side_lam0.5",
+    "avg_norm": 0.6803
+  },
+  {
+    "config": "svd_1side_lam0.4",
+    "avg_norm": 0.6716
+  },
+  {
+    "config": "ot_1side_lam0.3",
+    "avg_norm": 0.6648
+  },
+  {
+    "config": "svd_1side_lam0.3",
+    "avg_norm": 0.6584
+  },
+  {
+    "config": "ot_2side_lam0.5",
+    "avg_norm": 0.6536
+  }
+]
+
+REF: floor 0.64 | prev ot_ties 0.696 | KnOTS 0.740 | CoreSpace 0.764

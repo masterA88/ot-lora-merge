@@ -1,0 +1,7 @@
+config,avg_norm_acc,avg_acc
+bary_R16_lam1,0.6216,0.4986
+bary_R32_lam1,0.6253,0.5021
+bary_R64_lam1,0.6265,0.5032
+bary_R128_lam1,0.6259,0.5028
+bary_R128_lam2,0.5560,0.4388
+bary_R128_lam4,0.2627,0.2039

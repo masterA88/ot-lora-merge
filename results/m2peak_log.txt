@@ -1,0 +1,127 @@
+
+========== INSTALL ==========
+torch 2.6.0+cu124 Tesla P100-PCIE-16GB
+CUDA OK
+
+========== taskpool ==========
+taskpool ok
+
+========== load adapters + OT basis per layer ==========
+precomputed 48 layers in 265s
+
+========== PEAK GRID ot_ties lam{0.6,0.7,0.8} x keep{0.1,0.2,0.3} ==========
+  ot_lam0.6_keep0.1 FAILED:
+Traceback (most recent call last):
+  File "/kaggle/src/script.py", line 95, in run_cfg
+    t0=time.time(); rep=tp.evaluate(base); ev=time.time()-t0
+                        ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/fusion_bench/taskpool/clip_vision/taskpool.py", line 315, in evaluate
+    self.setup()
+  File "/usr/local/lib/python3.12/dist-packages/fusion_bench/taskpool/clip_vision/taskpool.py", line 206, in setup
+    name: instantiate(dataset) if isinstance(dataset, DictConfig) else dataset
+          ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/fusion_bench/utils/instantiate_utils.py", line 328, in instantiate
+    return instantiate_node(
+           ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/fusion_bench/utils/instantiate_utils.py", line 449, in instantiate_node
+    return _call_target(_target_, partial, args, kwargs, full_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/fusion_bench/utils/instantiate_utils.py", line 199, in _call_target
+    return _target_(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/datasets/load.py", line 1688, in load_dataset
+    builder_instance = load_dataset_builder(
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/datasets/load.py", line 1315, in load_dataset_builder
+    dataset_module = dataset_module_factory(
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/datasets/load.py", line 1207, in dataset_module_factory
+    raise e1 from None
+  File "/usr/local/lib/python3.12/dist-packages/datasets/load.py", line 1182, in dataset_module_factory
+    ).get_module()
+      ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/datasets/load.py", line 639, in get_module
+    data_files = DataFilesDict.from_patterns(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/datasets/data_files.py", line 723, in from_patterns
+    else DataFilesList.from_patterns(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/datasets/data_files.py", line 616, in from_patterns
+    resolve_pattern(
+  File "/usr/local/lib/python3.12/dist-packages/datasets/data_files.py", line 372, in resolve_pattern
+    for filepath, info in fs.glob(fs_pattern, detail=True, **glob_kwargs).items():
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/hf_file_system.py", line 747, in glob
+    return super().glob(path, maxdepth=maxdepth, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/fsspec/spec.py", line 609, in glob
+    allpaths = self.find(root, maxdepth=depth, withdirs=True, detail=True, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/hf_file_system.py", line 801, in find
+    path_info = self.info(path, **kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/hf_file_system.py", line 956, in info
+    self.ls(parent_path)
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/hf_file_system.py", line 522, in ls
+    out = self._ls_tree(path, refresh=refresh, revision=revision, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/hf_file_system.py", line 633, in _ls_tree
+    for path_info in tree:
+                     ^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/hf_api.py", line 3778, in list_repo_tree
+    for path_info in paginate(path=tree_url, headers=headers, params={"recursive": recursive, "expand": expand}):
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_pagination.py", line 36, in paginate
+    hf_raise_for_status(r)
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_http.py", line 889, in hf_raise_for_status
+    raise _format(HfHubHTTPError, str(e), response) from e
+huggingface_hub.errors.HfHubHTTPError: Server error '504 Gateway Time-out' for url 'https://huggingface.co/api/datasets/tanganke/gtsrb/tree/ea889fff70dda7b09e94a4b207dded438deca549?recursive=false&expand=false' (Amz CF ID: 3mkE5gvTZnoj-7yx2QR2fSqnlLSw806OPDxm9s0SlKJhR51acD7rdA==)
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/504
+
+  ot_lam0.6_keep0.2: avg_norm=0.7064 avg_acc=0.5799 (eval 448s)
+  ot_lam0.6_keep0.3: avg_norm=0.6930 avg_acc=0.5667 (eval 414s)
+  ot_lam0.7_keep0.1: avg_norm=0.7009 avg_acc=0.5768 (eval 413s)
+  ot_lam0.7_keep0.2: avg_norm=0.7079 avg_acc=0.5822 (eval 418s)
+  ot_lam0.7_keep0.3: avg_norm=0.6979 avg_acc=0.5719 (eval 418s)
+  ot_lam0.8_keep0.1: avg_norm=0.6675 avg_acc=0.5471 (eval 410s)
+  ot_lam0.8_keep0.2: avg_norm=0.7026 avg_acc=0.5779 (eval 421s)
+  ot_lam0.8_keep0.3: avg_norm=0.6949 avg_acc=0.5703 (eval 408s)
+
+========== WRITE CSV ==========
+BEST->WORST:
+[
+  {
+    "config": "ot_lam0.7_keep0.2",
+    "avg_norm": 0.7079
+  },
+  {
+    "config": "ot_lam0.6_keep0.2",
+    "avg_norm": 0.7064
+  },
+  {
+    "config": "ot_lam0.8_keep0.2",
+    "avg_norm": 0.7026
+  },
+  {
+    "config": "ot_lam0.7_keep0.1",
+    "avg_norm": 0.7009
+  },
+  {
+    "config": "ot_lam0.7_keep0.3",
+    "avg_norm": 0.6979
+  },
+  {
+    "config": "ot_lam0.8_keep0.3",
+    "avg_norm": 0.6949
+  },
+  {
+    "config": "ot_lam0.6_keep0.3",
+    "avg_norm": 0.693
+  },
+  {
+    "config": "ot_lam0.8_keep0.1",
+    "avg_norm": 0.6675
+  }
+]
+
+REF: floor 0.64 | prev best ot 0.706 | KnOTS 0.740 | CoreSpace 0.764

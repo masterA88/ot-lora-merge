@@ -1,0 +1,60 @@
+
+========== INSTALL torch 2.6.0+cu124 + our package ==========
+torch 2.6.0+cu124 Tesla P100-PCIE-16GB
+CUDA OK
+ot_lora_merge 0.1.0
+
+========== TEST DATASET CFGS + taskpool ==========
+taskpool ok
+
+========== LOAD 8 ADAPTERS (unmerged) + extract factors ==========
+collected 48 layers x 8 tasks; sample layer=encoder.layers.0.self_attn.k_proj
+
+========== OT MERGE: align + barycenter ==========
+
+--- OT_align (mode=align {'cost': 'paired', 'eps': 0.01}) ---
+  merged 48 layers in 10.6s (CPU OT)
+  load_state_dict: 0 lora keys missing (should be 0)
+  eval 1269s
+  OT_align: avg_norm=0.6100 avg_acc=0.4865
+  per-task: {"sun397": 0.62735515832901, "stanford-cars": 0.6154707074165344, "resisc45": 0.61301589012146, "eurosat": 0.43111109733581543, "svhn": 0.3408881425857544, "gtsrb": 0.34196358919143677, "mnist": 0.49070000648498535, "dtd": 0.4313829839229584, "average": 0.48648594692349434}
+
+--- OT_barycenter (mode=barycenter {'cost': 'paired', 'eps': 0.01}) ---
+  merged 48 layers in 59.7s (CPU OT)
+  load_state_dict: 0 lora keys missing (should be 0)
+  eval 416s
+  OT_barycenter: avg_norm=0.6217 avg_acc=0.4986
+  per-task: {"sun397": 0.6258941888809204, "stanford-cars": 0.6070140600204468, "resisc45": 0.6173015832901001, "eurosat": 0.459629625082016, "svhn": 0.37822678685188293, "gtsrb": 0.35304829478263855, "mnist": 0.5199000239372253, "dtd": 0.4276595711708069, "average": 0.4985842667520046}
+
+========== WRITE CSV ==========
+wrote m1_results.csv
+[
+  {
+    "method": "OT_align",
+    "avg_norm_acc": 0.61,
+    "avg_acc": 0.4865,
+    "sun397": 0.6274,
+    "stanford-cars": 0.6155,
+    "resisc45": 0.613,
+    "eurosat": 0.4311,
+    "svhn": 0.3409,
+    "gtsrb": 0.342,
+    "mnist": 0.4907,
+    "dtd": 0.4314
+  },
+  {
+    "method": "OT_barycenter",
+    "avg_norm_acc": 0.6217,
+    "avg_acc": 0.4986,
+    "sun397": 0.6259,
+    "stanford-cars": 0.607,
+    "resisc45": 0.6173,
+    "eurosat": 0.4596,
+    "svhn": 0.3782,
+    "gtsrb": 0.353,
+    "mnist": 0.5199,
+    "dtd": 0.4277
+  }
+]
+
+REFERENCE: baselines floor TA0.1=0.639 simpleavg=0.636 TIES=0.634 | targets KnOTS=0.740 CoreSpace=0.764 GeoMerge=0.771

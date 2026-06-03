@@ -1,0 +1,11 @@
+config,avg_norm_acc,avg_acc
+ot_1side_lam0.6,0.7064,0.5799
+ot_1side_lam0.5,0.6958,0.5689
+svd_1side_lam0.6,0.6873,0.5617
+ot_1side_lam0.4,0.6824,0.5553
+svd_1side_lam0.5,0.6822,0.5564
+svd_2side_lam0.5,0.6803,0.5524
+svd_1side_lam0.4,0.6716,0.5453
+ot_1side_lam0.3,0.6648,0.5383
+svd_1side_lam0.3,0.6584,0.5321
+ot_2side_lam0.5,0.6536,0.5274

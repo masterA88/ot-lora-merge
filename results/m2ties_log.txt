@@ -1,0 +1,40 @@
+
+========== INSTALL ==========
+torch 2.6.0+cu124 Tesla P100-PCIE-16GB
+CUDA OK
+
+========== taskpool ==========
+taskpool ok
+
+========== load adapters + precompute per-layer bases ==========
+layers 48
+precomputed bases for 48 layers in 276s
+
+========== RUN: svd_ties (control) + ot_ties (ours) ==========
+  svd_ties_keep20_lam0.5: avg_norm=0.6822 avg_acc=0.5564 (layers 48, eval 829s)
+  svd_ties_keep20_lam1.0: avg_norm=0.5452 avg_acc=0.4367 (layers 48, eval 426s)
+  ot_ties_keep20_lam0.5: avg_norm=0.6958 avg_acc=0.5689 (layers 48, eval 426s)
+  ot_ties_keep20_lam1.0: avg_norm=0.6421 avg_acc=0.5250 (layers 48, eval 422s)
+
+========== WRITE CSV ==========
+BEST->WORST:
+[
+  {
+    "config": "ot_ties_keep20_lam0.5",
+    "avg_norm": 0.6958
+  },
+  {
+    "config": "svd_ties_keep20_lam0.5",
+    "avg_norm": 0.6822
+  },
+  {
+    "config": "ot_ties_keep20_lam1.0",
+    "avg_norm": 0.6421
+  },
+  {
+    "config": "svd_ties_keep20_lam1.0",
+    "avg_norm": 0.5452
+  }
+]
+
+REF: floor 0.64 | KnOTS 0.740 | CoreSpace 0.764

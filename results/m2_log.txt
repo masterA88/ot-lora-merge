@@ -1,0 +1,64 @@
+
+========== INSTALL torch 2.6.0+cu124 + our package ==========
+torch 2.6.0+cu124 Tesla P100-PCIE-16GB
+CUDA OK
+
+========== taskpool ==========
+taskpool ok
+
+========== load 8 adapters -> layer_adapters ==========
+layers 48 | sample encoder.layers.0.self_attn.k_proj
+layers with no base key (should be 0): 0 []
+
+========== BARYCENTER rank sweep (lam=1) ==========
+
+-- merge barycenter R=16 --
+  merged in 58.4s
+  bary_R16_lam1: avg_norm=0.6216 avg_acc=0.4986 (applied 48 layers, eval 1020s)
+
+-- merge barycenter R=32 --
+  merged in 77.5s
+  bary_R32_lam1: avg_norm=0.6253 avg_acc=0.5021 (applied 48 layers, eval 407s)
+
+-- merge barycenter R=64 --
+  merged in 126.4s
+  bary_R64_lam1: avg_norm=0.6265 avg_acc=0.5032 (applied 48 layers, eval 413s)
+
+-- merge barycenter R=128 --
+  merged in 236.6s
+  bary_R128_lam1: avg_norm=0.6259 avg_acc=0.5028 (applied 48 layers, eval 406s)
+
+========== SCALING at R=128 ==========
+  bary_R128_lam2.0: avg_norm=0.5560 avg_acc=0.4388 (applied 48 layers, eval 419s)
+  bary_R128_lam4.0: avg_norm=0.2627 avg_acc=0.2039 (applied 48 layers, eval 414s)
+
+========== WRITE CSV ==========
+BEST->WORST:
+[
+  {
+    "config": "bary_R64_lam1",
+    "avg_norm": 0.6265
+  },
+  {
+    "config": "bary_R128_lam1",
+    "avg_norm": 0.6259
+  },
+  {
+    "config": "bary_R32_lam1",
+    "avg_norm": 0.6253
+  },
+  {
+    "config": "bary_R16_lam1",
+    "avg_norm": 0.6216
+  },
+  {
+    "config": "bary_R128_lam2.0",
+    "avg_norm": 0.556
+  },
+  {
+    "config": "bary_R128_lam4.0",
+    "avg_norm": 0.2627
+  }
+]
+
+REF: floor 0.64 | KnOTS 0.740 | CoreSpace 0.764
