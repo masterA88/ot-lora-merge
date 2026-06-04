@@ -54,7 +54,7 @@ retraining is an attractive route to compute-frugal model reuse. The strongest e
 subspace} in which the per-task updates are expressed, and (ii) inside that subspace they
 \emph{resolve interference} (sign election, magnitude trimming) rather than naively averaging.
 The subspace, however, is invariably chosen by a singular value decomposition (SVD) of the stacked
-task updates, an algebraic, geometry-agnostic choice. In this paper we ask whether
+task updates, an algebraic, geometry-agnostic choice. In this project we ask whether
 \emph{optimal transport} (OT) yields a better shared subspace. We make three contributions.
 First, we give a careful negative result: merging LoRA adapters by an OT \emph{average}
 (a Wasserstein barycenter of their singular-direction distributions) plateaus at the
@@ -123,7 +123,7 @@ fusion of \citet{singh2020fusion} aligns \emph{neurons} across full $d\times d$ 
 unrelated to the low-rank structure of LoRA. The lane ``merge LoRA adapters by optimal transport in the
 rank-$r$ subspace'' is essentially empty.
 
-\paragraph{This paper.}
+\paragraph{This project.}
 We investigate whether OT yields a better merge subspace than SVD, with a deliberately controlled
 comparison, and we report both a negative and a positive result.
 
@@ -170,7 +170,7 @@ combiner, not to the OT subspace (Section~\ref{sec:analysis}).}
 \end{figure}
 
 \paragraph{Compute-frugality as a first-class goal.}
-Every merge in this paper is a sequence of small ($r\times r$ to $k\times k$, $r\le 16$, $k\le 128$)
+Every merge in this project is a sequence of small ($r\times r$ to $k\times k$, $r\le 16$, $k\le 128$)
 linear-algebra operations and runs on a CPU in minutes for the full ViT-B/32 model; no GPU is needed for
 the merge itself, only for evaluation. The complete study, reproducing five baseline configurations,
 two failed OT-averaging families, the \otties{} ablation grid, and the heterogeneous-rank experiment --
@@ -298,7 +298,7 @@ data-free and training-free.
 In one sentence: prior strong LoRA merges resolve interference inside an \emph{SVD-chosen} shared
 subspace; we keep the resolver and replace the subspace by an \emph{OT-chosen} one, and we additionally
 remove the rank-homogeneity assumption that the geometric state of the art structurally requires.
-Table~\ref{tab:methodcompare} places the main methods on the axes that matter for this paper.
+Table~\ref{tab:methodcompare} places the main methods on the axes that matter for this project.
 
 \begin{table}[t]
 \centering
@@ -1482,7 +1482,7 @@ is computed by the alternating transport/update scheme we use. Gromov--Wasserste
 \citep{memoli2011gromov} replaces the cross-space cost by a quadratic mismatch of \emph{intra}-space
 distance matrices (Eq.~\eqref{eq:gw}); it is invariant to isometries of each space and therefore couples
 distributions that live in spaces of different dimension, the property we exploit for
-heterogeneous-rank adapters. For all problems in this paper the supports are tiny (rank $r\le16$, or
+heterogeneous-rank adapters. For all problems in this project the supports are tiny (rank $r\le16$, or
 $k\le128$ barycenter atoms), so even the exact LP/EMD solver is negligible; entropic Sinkhorn is used for
 smoothness and speed. We use the POT library \citep{flamary2021pot} for the solvers.
 
@@ -1545,7 +1545,7 @@ accumulate the $\lambda_t$-weighted transported update; refactor to the target r
 \subsection{Identity guarantee}
 \begin{lemma}[Single-adapter identity]
 \label{lem:identity}
-For $T=1$, every merge operator in this paper (M-align, M-bary, \otties{}, GW) returns exactly the input
+For $T=1$, every merge operator in this project (M-align, M-bary, \otties{}, GW) returns exactly the input
 update $\dW_1$.
 \end{lemma}
 \begin{proof}
