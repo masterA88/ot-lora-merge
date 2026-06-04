@@ -1,0 +1,4 @@
+method,avg_norm_acc,avg_acc,merge_sec
+ot_ties_mixedrank,0.6985,0.5729,264.4
+gw_mixedrank,0.6233,0.5005,359.4
+ot_ties_homo_r16_ref,0.7079,0.5822,273.9

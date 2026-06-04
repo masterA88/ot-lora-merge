@@ -54,8 +54,15 @@ from **TIES interference-resolution inside a shared subspace**, and our contribu
 
 Research repo. CPU OT core + the headline **OT-TIES** merge (`ot_lora_merge.ot_ties_model`) implemented
 and unit-tested (17/17). GPU eval harness wraps **FusionBench** (apples-to-apples baselines + eval).
-M0 (baselines) and M1–M2 (our method + ablations) are run and recorded in `results/`. Remaining:
-M3 heterogeneous-rank Gromov-Wasserstein carve-out; write-up.
+**M0–M3 complete** (all on free Kaggle GPU; see `results/m0_results.md`, `m2_results.md`, `m3_results.md`):
+- **M0** baselines reproduced (Task-Arithmetic within 0.1% of published) — harness validated.
+- **M1–M2** OT-TIES: an **OT-chosen merge subspace beats the SVD-chosen one (KnOTS-style) under identical
+  TIES, at every scaling** (+0.7…+1.9%); peak **0.708** vs control 0.687, floor 0.64.
+- **M3** heterogeneous-rank carve-out: OT-TIES merges a mixed-rank {4,8,16} adapter zoo at **0.698**
+  (−1.0% vs homogeneous) — **a setting GeoMerge / Core-Space structurally cannot enter**. All merges are
+  pure CPU (~4–6 min/model).
+
+Remaining: write-up (workshop paper); optional accuracy push toward the full-KnOTS 0.74.
 
 ## Install
 

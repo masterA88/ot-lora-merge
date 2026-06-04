@@ -1,0 +1,45 @@
+
+========== INSTALL ==========
+ot_lora_merge OK attempt 1 0.1.0
+torch 2.6.0+cu124 Tesla P100-PCIE-16GB
+CUDA OK
+
+========== taskpool ==========
+taskpool ok
+
+========== load adapters -> homo r16 + mixed-rank zoo ==========
+layers 48 | mixed ranks: {"sun397": 16, "stanford-cars": 8, "resisc45": 4, "eurosat": 16, "svhn": 8, "gtsrb": 4, "mnist": 16, "dtd": 8}
+mixed ranks at layer0: [16, 8, 4, 16, 8, 4, 16, 8]
+
+========== (1) ot_ties on MIXED-rank zoo ==========
+  merged 48 layers in 264.4s (CPU)
+  ot_ties_mixedrank: avg_norm=0.6985 avg_acc=0.5729 (eval 1018s)
+
+========== (2) GW mode on MIXED-rank zoo ==========
+  GW-merged 48 layers in 359.4s (CPU)
+  gw_mixedrank: avg_norm=0.6233 avg_acc=0.5005 (eval 444s)
+
+========== (3) REFERENCE ot_ties on HOMOGENEOUS r16 ==========
+  merged 48 layers in 273.9s (CPU)
+  ot_ties_homo_r16_ref: avg_norm=0.7079 avg_acc=0.5822 (eval 409s)
+
+========== WRITE CSV ==========
+[
+  {
+    "method": "ot_ties_mixedrank",
+    "avg_norm": 0.6985,
+    "merge_sec": 264.4
+  },
+  {
+    "method": "gw_mixedrank",
+    "avg_norm": 0.6233,
+    "merge_sec": 359.4
+  },
+  {
+    "method": "ot_ties_homo_r16_ref",
+    "avg_norm": 0.7079,
+    "merge_sec": 273.9
+  }
+]
+
+NOTE: mixed-rank zoo {"sun397": 16, "stanford-cars": 8, "resisc45": 4, "eurosat": 16, "svhn": 8, "gtsrb": 4, "mnist": 16, "dtd": 8}; rank-fixed methods cannot natively merge this.
