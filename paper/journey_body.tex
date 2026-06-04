@@ -1,0 +1,345 @@
+\section{The complete experimental journey: a faithful step-by-step record}
+\label{app:journey}
+This appendix is a deliberately exhaustive, chronological account of how the entire project was carried
+out, written so that a reader can follow every decision, every probe, every failed run, and every fix
+without needing the chat transcript. Nothing essential is summarized away: the dead-ends (a wrong
+backbone, four broken environments, three failed code-transport attempts) are included because they are
+exactly what a replicator must avoid. Each numbered phase corresponds to released artifacts (a Kaggle
+kernel log and/or a \texttt{results/*.csv}); the kernel-by-kernel timeline is in
+Table~\ref{tab:timeline}.
+
+\subsection{Methodology: probe-first, fail-fast, free-compute}
+\label{app:method-meta}
+The discipline that kept the whole study inside a free weekly GPU quota was: never spend GPU time on an
+uncertainty a cheap probe can resolve. Concretely: (1) build and unit-test the CPU merge core
+\emph{offline}; (2) resolve every external-API unknown with \emph{GPU-off} probe kernels (adapter
+repository IDs, PEFT key layout, evaluation-harness construction, algorithm constructor signatures, the
+exact \texttt{torch}/CUDA combination); (3) only then launch a GPU kernel, with a hard CUDA sanity gate at
+the top so a bad environment aborts in seconds rather than after a multi-minute install, incremental log
+dumps, and a \texttt{try/except} around every evaluation so one failure never discards a run's partial
+results. Every Kaggle kernel was pushed and driven programmatically; the GPU was used only to evaluate
+merged models, never to merge.
+
+\subsection{Starting state (what existed before this push)}
+Prior work had produced: the pure-NumPy merge core (\texttt{ot\_lora\_merge}) with the OT primitives and
+the FusionBench evaluation hook wired against the v0.2.x API; a passing offline unit-test suite; and a
+first-draft set of milestone runners. Crucially, that draft assumed the benchmark adapters were
+\texttt{tanganke/clip-vit-base-patch32\_<task>\_lora-16}. That assumption turned out to be wrong, and
+correcting it (Phases~\ref{app:phase-probe1}--\ref{app:phase-reconcile}) was the first real work.
+
+\subsection{Phase 1 -- Probe 1 and the B/16 detour}
+\label{app:phase-probe1}
+The first GPU-off probe installed FusionBench and checked three things: that the API names the runners
+used actually import; the contents of FusionBench's bundled LoRA modelpool config; and whether a
+\texttt{tanganke} patch32 LoRA adapter loads. Findings: (i) all nine wired API names import; (ii) the
+bundled LoRA pool is \texttt{clip-vit-base-patch16\_TA8\_lora}, i.e. ViT-B/\textbf{16}, not B/32, listing
+adapters \texttt{tanganke/clip-vit-base-patch16\_<task>\_lora-16}; (iii) the assumed B/32 LoRA
+repositories \emph{do not exist} (HTTP 401/404), only full fine-tuned B/32 models do. Acting on the
+authoritative bundled config, we migrated the whole repository to B/16: created a B/16 modelpool config,
+removed the B/32 one, and re-pointed every runner/doc. This was the correct move \emph{given probe 1
+alone}, and it is recorded here because it is a detour a naive replication will also take.
+
+\subsection{Phase 2 -- Probe 2 (B/16 adapter internals; parser validated)}
+A second GPU-off probe loaded a real B/16 adapter and printed its internals: $r=16$, $\alpha=32$ (so
+scale $2.0$), \texttt{target\_modules} $=\{q,v\}_{\text{proj}}$ (attention query/value only), $48$ LoRA
+tensors per adapter, with PeftModel keys
+\texttt{base\_model.model.vision\_model.encoder.layers.\{i\}.self\_attn.\{q,v\}\_proj.lora\_\{A,B\}.default.weight}
+($A$ shape $(16,768)$, $B$ shape $(768,16)$). We confirmed that our \texttt{peft\_io} key parser reads
+exactly this layout (both the ``\texttt{default}'' PEFT$\ge$0.11 form and the raw-safetensors form), so no
+loader code needed changing. At this point the repository was internally consistent on B/16.
+
+\subsection{Phase 3 -- the backbone decision (the pivotal fork)}
+\label{app:phase-backbone}
+Synchronizing the research plan surfaced a conflict that probe 1 alone had hidden: the \emph{published
+bar} we set out to beat (GeoMerge $0.771$, Core Space $0.764$, KnOTS $0.740$) is measured on B/\textbf{32}
+adapters of the KnOTS lineage, \emph{not} on the FusionBench-bundled B/16 pool. Adopting B/16 would have
+made our numbers incomparable to that bar. A web check of the KnOTS repository revealed that its authors
+release the B/32 LoRA adapters publicly on a model hub collection. This turned ``which backbone'' into a
+genuine decision with a real trade-off (zero-training B/16 vs.\ bar-comparable B/32), so it was put to the
+user, who chose \textbf{B/32 KnOTS} precisely for comparability. This is the single most consequential
+setup decision in the project.
+
+\paragraph{Probe 3 (authoritative KnOTS B/32 facts).}
+A third GPU-off probe enumerated the KnOTS hub collection and inspected one adapter. The collection holds
+the eight B/32 vision adapters \texttt{hoffman-lab/KnOTS-ViT-B-32\_lora\_R16\_<task>} (plus ViT-L/14 and
+Llama-3-8B variants we do not use). Their config: $r=16$, $\alpha=16$ (scale $\mathbf{1.0}$, not $2.0$ as
+in the B/16 pool), \texttt{target\_modules} $=\{q,k,v,\text{out}\}_{\text{proj}}$ (all four attention
+projections, not just $q,v$), \texttt{base\_model\_name\_or\_path} $=$ \texttt{null} (so the base
+\texttt{openai/clip-vit-base-patch32} must be supplied), weights stored as \texttt{adapter\_model.bin}.
+These facts (scale $1.0$, four target modules, null base, \texttt{.bin}) each later mattered.
+
+\subsection{Phase 4 -- reconciling the repository and the research plan to B/32}
+\label{app:phase-reconcile}
+We then reversed the B/16 detour: created the authoritative B/32 KnOTS modelpool config, removed the
+B/16 one, re-pointed every runner and document back to B/32 and to the four-projection target, corrected
+the \texttt{peft\_io} comments to the KnOTS facts, and updated the README ``bar'' table. The offline unit
+tests still passed ($12/12$ at that point). In parallel the research-plan documents (the question,
+notes, experiment spec, and plan) were synchronized to the B/32 KnOTS decision, with the adapter
+provenance and the comparability rationale written in.
+
+\subsection{Phase 5 -- Probe 4 (does the harness load KnOTS, end to end?)}
+The last pre-GPU unknown was whether FusionBench's \texttt{load\_lora\_vision\_model\_hf} could load the
+KnOTS adapters (\texttt{.bin}, null base, four target modules) and whether our parser then reads them. A
+fourth GPU-off probe confirmed: the loader returns a PeftModel \emph{natively}, no shim needed; the shim
+fallback (\texttt{PeftModel.from\_pretrained}) also works; and \texttt{peft\_io.lora\_state\_to\_layers}
+extracts $48$ layers ($12$ blocks $\times$ $\{q,k,v,\text{out}\}$), each $A=(16,768)$, $B=(768,16)$, scale
+$1.0$. This eliminated the only remaining risk before spending GPU quota; the corresponding code
+``VERIFY-IN-KAGGLE'' markers were promoted to ``confirmed.''
+
+\subsection{Phase 6 -- M0 baselines and the four-environment saga}
+\label{app:m0saga}
+Establishing baselines required resolving a genuinely awkward \texttt{torch}/CUDA/\texttt{transformers}
+knot on the assigned (Pascal/P100) GPU, plus two FusionBench-API corrections. We give the full kernel
+sequence (Table~\ref{tab:m0saga}) because a replicator will hit the same walls.
+
+\begin{table}[h]
+\centering
+\caption{The M0 kernel-version saga. Versions failed progressively later; only the last two consumed
+meaningful GPU time (earlier ones aborted at load, by design, via the sanity gate).}
+\label{tab:m0saga}
+\small
+\begin{tabular}{p{0.6cm} p{6.3cm} p{7.4cm}}
+\toprule
+ver & symptom & cause / fix \\
+\midrule
+v1 & taskpool was a raw \texttt{DictConfig} (``\texttt{Missing key evaluate}''); \texttt{TaskArithmeticAlgorithm}
+and \texttt{TiesMergingAlgorithm} \texttt{\_\_init\_\_} missing required args & Hydra \texttt{defaults:}
+not resolved by \texttt{OmegaConf.load}; build the taskpool from the \texttt{\_template} structure
+instead; supply method args (resolved by Probe 5) \\
+v2 & ``\texttt{CUDA error: no kernel image available for execution on the device}'' on first forward pass
+& the default free image ships \texttt{torch 2.10+cu128}, whose binaries dropped the Pascal
+(\texttt{sm\_60}) kernels the P100 needs \\
+v3 & same CUDA error after pinning to the ``preinstalled'' build & the preinstalled build \emph{is} the
+broken \texttt{2.10+cu128}; pinning to it changes nothing \\
+v4 & \texttt{torch 2.5.1+cu121} now runs on the P100, but \texttt{transformers} refuses to
+\texttt{torch.load} the \texttt{.bin} adapters & a CVE-2025-32434 guard requires \texttt{torch>=2.6} to
+load legacy \texttt{.bin} weights \\
+v5 & \texttt{torch 2.6.0+cu124}: passes the sanity gate; \texttt{simple\_average} runs and matches
+expectations, but \texttt{task\_arithmetic}/\texttt{ties} crash with a state-dict key/size mismatch &
+adapters loaded \texttt{merge\_and\_unload=false} are PEFT-wrapped (extra \texttt{base\_layer}/\texttt{lora}
+keys), so subtracting the plain pretrained fails \\
+v6 & all three baselines run to completion & load with \texttt{merge\_and\_unload=true} (fold LoRA into
+the full weight), matching how FusionBench's bundled TA8 config, and the published numbers, are computed \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Probe 5 (the FusionBench Hydra API), run between v1 and v2.}
+v1's two failures were both API-shape problems, so we resolved them with a fifth GPU-off probe rather than
+by trial-and-error on the GPU. It established that the shipped taskpool YAML is a Hydra config
+\emph{group} and cannot be built with \texttt{compose} (it raises \texttt{MissingConfigException}); the
+correct construction is to instantiate the \texttt{\_template} directly (\texttt{\_target\_:
+fusion\_bench.taskpool.CLIPVisionModelTaskPool}, \texttt{base\_model}=patch32, \texttt{clip\_model} and
+\texttt{processor} from \texttt{CLIPModel/CLIPProcessor.from\_pretrained}, \texttt{test\_datasets} filled
+from the shipped per-task \texttt{dataset/.../test/<task>.yaml} configs). It also printed the exact method
+constructor signatures and their default arguments: \texttt{TaskArithmeticAlgorithm(scaling\_factor=0.3)},
+\texttt{TiesMergingAlgorithm(scaling\_factor=0.3, threshold=20, remove\_keys=[], merge\_func='sum')}, and
+\texttt{SimpleAverageAlgorithm()}.
+
+\paragraph{The first specialist numbers.} v5/v6 also produced the specialist accuracies
+(Table~\ref{tab:specialists}); they reproduce the released KnOTS fine-tuned numbers, which is the first
+direct evidence the evaluation pipeline is faithful.
+
+\subsection{Phase 7 -- baseline tuning and harness validation}
+\label{app:tuning}
+The first complete baseline table (v6) was off: \texttt{task\_arithmetic} at the FusionBench default
+$\lambda=0.3$ gave $0.405$, and \texttt{ties} with the default \texttt{merge\_func='sum'} gave $0.325$,
+\emph{below} simple average and in the wrong order. Reading FusionBench's \texttt{run()} source confirmed
+that Task Arithmetic \emph{sums} all eight task vectors then scales, so the right operating point is small
+$\lambda$. A tuning sweep gave Task Arithmetic $\{0.639, 0.566, 0.405, 0.239\}$ for
+$\lambda\in\{0.1,0.2,0.3,0.4\}$ and TIES with the disjoint-\texttt{mean} combiner $\{0.634, 0.454\}$ for
+$\lambda\in\{0.3,1.0\}$. Task Arithmetic at $\lambda=0.1$ reaches $0.639$, within $0.1$ point of the
+published Task-Arithmetic-Full number ($0.638$): the harness-validation checkpoint that licensed every
+subsequent method number. All naive baselines cluster at $\approx 0.64$, the expected literature floor.
+
+\subsection{Phase 8 -- getting our own code onto the worker (code transport)}
+\label{app:transport}
+Our method needs our package on the Kaggle worker. The first attempt pushed the repository to a
+\emph{private} GitHub and tried \texttt{pip install git+https://\dots}; an anonymous clone of a private
+repo fails. We then made the repository \emph{public} (a deliberate choice the user confirmed, trading
+pre-publication disclosure for clean reproducibility) and the install worked. We also tried packaging the
+code as a Kaggle dataset, but the Kaggle CLI on the local Windows host has a path bug in its upload
+staging (it mixes forward and back slashes), so the dataset route was abandoned in favor of
+\texttt{git+}. These transport hiccups recur in M3 (Phase~\ref{app:m3saga}).
+
+\subsection{Phase 9 -- M1: optimal-transport averaging (the negative result)}
+\label{app:m1}
+With the package installed, M1 loaded the eight adapters \emph{unmerged} (so the parser reads the
+factors), ran our two OT-\emph{averaging} merges (M-align and M-bary) via \texttt{merge\_model}, wrote the
+merged factors back into a reference PeftModel, folded them in, and evaluated on the same taskpool. The
+pipeline ran cleanly (zero missing keys, $10$\,s align / $60$\,s barycenter on CPU), but the numbers sat
+at the floor: M-align $0.610$, M-bary $0.622$, below tuned Task Arithmetic. The per-task pattern showed
+the interference signature: easy near-orthogonal tasks survived (SUN397 $0.63$) while conflict-heavy tasks
+collapsed (SVHN $0.34$, GTSRB $0.34$, EuroSAT $0.46$).
+
+\subsection{Phase 10 -- M2 rank sweep: the hypothesis, and its refutation}
+\label{app:m2rank}
+Our first hypothesis was that the floor was a \emph{rank} artifact: the merge compressed the union
+subspace back to rank $16$, so keeping more rank (as KnOTS/Core Space do) should help. Reading the core
+confirmed that \texttt{align} is structurally rank-capped (it projects every task into the anchor's
+$16$-atom frame) but the barycenter's target rank $R$ is a real lever. The sweep
+$R\in\{16,32,64,128\}$ returned $\{0.622, 0.625, 0.627, 0.626\}$ ($<0.5$ point) and increasing the scale
+hurt ($\lambda{=}2\!: 0.556$, $\lambda{=}4\!: 0.263$). The rank hypothesis was \textbf{refuted}. The
+correct diagnosis (Proposition~\ref{prop:avg}) is that a barycenter is an \emph{average}, and averaging
+cannot resolve sign interference at any rank. This negative result was the turning point; it was put to
+the user as a fork (pivot to the heterogeneous-rank carve-out / try a new OT formulation / pause for more
+research), and the user chose to try a new formulation first.
+
+\subsection{Phase 11 -- M2 OT-TIES: the controlled breakthrough}
+\label{app:m2ties}
+The diagnosis dictated the fix: keep the TIES resolver (which \emph{does} sign-elect) and use OT only to
+choose the subspace it acts in. We ran the controlled comparison of Section~\ref{sec:results-otties}:
+identical TIES, with the shared subspace either the SVD of stacked factors (\svdties{}, the KnOTS-style
+control) or the leading subspace of the OT barycenter (\otties{}). At $\kappa=0.2$, $\lambda=0.5$,
+\svdties{} reached $0.682$ (KnOTS territory, validating the implementation) and \otties{} reached $0.696$,
+beating it. A $\lambda$ sweep showed the OT subspace wins at \emph{every} scaling: $\{0.665, 0.682,
+0.696, 0.706\}$ for \otties{} vs.\ $\{0.658, 0.672, 0.682, 0.687\}$ for \svdties{} at
+$\lambda\in\{0.3,0.4,0.5,0.6\}$, a $+0.7$ to $+1.9$ point advantage. A two-sided reconstruction (project
+both $U$ and $V$) was worse for \emph{both} bases ($0.680$/$0.654$), so the one-sided left-basis form was
+kept. A peak grid over $(\lambda,\kappa)$ placed the optimum at $(0.7, 0.2)$ with \otties{}$=0.708$, the
+surface flat around it (one grid cell failed on a transient hub timeout and is omitted).
+
+\subsection{Phase 12 -- M2 consolidation (method into the package)}
+We promoted the winning method into the package as \texttt{ot\_ties\_layer}/\texttt{ot\_ties\_model}
+(defaults $k{=}128$, $\kappa{=}0.2$, $\lambda{=}0.7$) and added unit tests; one test initially failed
+because the toy sign-election example summed to exactly zero (a degenerate tie), which we corrected to a
+nonzero-sum case. The suite then passed $17/17$ offline. Results were written to \texttt{m2\_results.md}
+and the README bar table updated, then committed and pushed.
+
+\subsection{Phase 13 -- M3: heterogeneous rank, and the code-transport saga (again)}
+\label{app:m3saga}
+For the structural carve-out we built a genuinely mixed-rank zoo by SVD-truncating the eight rank-16
+adapters to ranks $\{4,8,16\}$ (free, no training). Running M3 reprised the transport problem in a sharper
+form (Table~\ref{tab:m3saga}): the GitHub repository had \emph{reverted to private} on its own, so the
+anonymous clone failed (v1); a clone-retry guard could not fix an auth failure (v2); embedding the package
+as a base64 tarball inside the notebook corrupted in transit (a $\sim\!20$\,KB blob failed
+\texttt{zlib} decompression, v3); making the repository public again and installing via \texttt{git+} with
+a retry guard finally worked (v4). The result: \otties{} merges the mixed-rank zoo at $0.698$, only $1.0$
+point below the homogeneous case, and the GW operator runs at $0.623$; both merges are pure CPU
+($264$--$359$\,s). This is the capability the rank-fixed baselines cannot offer at all.
+
+\begin{table}[h]
+\centering
+\caption{The M3 code-transport saga (getting our own package onto the worker, a second time).}
+\label{tab:m3saga}
+\small
+\begin{tabular}{p{0.6cm} p{6.3cm} p{7.4cm}}
+\toprule
+ver & symptom & cause / fix \\
+\midrule
+v1 & \texttt{git clone} exited $128$ $\Rightarrow$ \texttt{ModuleNotFoundError: ot\_lora\_merge} & the repo
+had reverted to private; anonymous clone fails \\
+v2 & same, despite a clone-retry guard & a retry cannot fix an authentication failure \\
+v3 & embedded base64 tarball: \texttt{zlib error: invalid code lengths set} & a $\sim\!20$\,KB blob inlined
+in the notebook corrupts in transit; do not embed code this way \\
+v4 & success & set the repo public (\texttt{gh repo edit --visibility public}) and
+\texttt{pip install git+\dots} with a $5\times$ retry \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Operational lessons (tooling pitfalls worth knowing)}
+\label{app:ops}
+Several non-research pitfalls cost real time and are worth recording for anyone driving Kaggle
+programmatically:
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+\item \textbf{GPU sanity gate.} Put a tiny CUDA op (embedding + matmul + conv) at the very top of every GPU
+kernel and abort on failure; this turned the multi-minute ``install then crash on first forward'' loop of
+the environment saga into a few-second fail.
+\item \textbf{Status parsing.} A status watcher that greps for the bare substring ``error'' or ``running''
+false-positives on transient CLI messages; match the structured token \texttt{KernelWorkerStatus.<STATE>}
+instead. We hit exactly this false ``ERROR'' once and wasted a check.
+\item \textbf{Signed download URLs.} The hub's signed result-file URLs must be pasted verbatim into a
+variable; manually retyping or line-wrapping them corrupts the signature and yields a $0$-byte download.
+\item \textbf{Notebook title collisions.} Re-saving a kernel with a title already in use is rejected; bump
+the title (``\dots v2'') and note that the live slug then becomes the bumped form.
+\item \textbf{Incremental dumps.} Writing the running log to disk after every step, and wrapping each
+evaluation in \texttt{try/except}, meant that even runs that ended in an error still yielded all results
+computed before the failure.
+\end{itemize}
+
+\subsection{Where the user steered the project (decision forks)}
+For honesty about how the project was directed, the explicit decision points were: (i) the backbone
+choice (B/32 KnOTS over B/16, for bar comparability, Phase~\ref{app:phase-backbone}); (ii) the order after
+M0 (tune the baselines to reproduce the published bar before proceeding); (iii) the response to the M1/M2
+negative result (try a new OT formulation before falling back to the carve-out, Phase~\ref{app:m2rank});
+(iv) the code-transport policy (make the repository public for clean reproducibility,
+Phase~\ref{app:transport}). Everything else followed from the data.
+
+\subsection{Kernel-by-kernel timeline}
+Table~\ref{tab:timeline} lists every Kaggle kernel in order, whether it used the GPU, its purpose, and its
+outcome. The five probes and the early failed versions are GPU-off or fail-fast, which is why the total
+GPU consumption stayed inside the free weekly quota.
+
+\begin{table}[h]
+\centering
+\caption{Every Kaggle kernel, in order. ``GPU'' = whether the GPU was enabled; probes are GPU-off by
+design.}
+\label{tab:timeline}
+\small
+\begin{tabular}{p{0.4cm} p{5.4cm} c p{6.6cm}}
+\toprule
+\# & kernel (purpose) & GPU & outcome \\
+\midrule
+1 & probe 1 -- FusionBench API + bundled config & no & bundled pool is B/16; B/32 \texttt{tanganke} LoRA
+repos absent \\
+2 & probe 2 -- B/16 adapter internals & no & $r16$, $\alpha32$, $q,v$; parser validated \\
+3 & probe 3 -- KnOTS B/32 collection & no & $r16$, $\alpha16$, $q,k,v,\text{out}$, null base, \texttt{.bin} \\
+4 & probe 4 -- KnOTS loader + parser & no & loads natively; $48$ layers extracted \\
+5 & probe 5 -- FusionBench Hydra/method API & no & taskpool from \texttt{\_template}; method arg defaults \\
+6 & M0 v1 -- baselines & yes & taskpool + method-arg errors (fail-fast) \\
+7 & M0 v2 -- baselines & yes & CUDA \texttt{sm\_60} missing (fail-fast) \\
+8 & M0 v3 -- baselines & yes & same; ``preinstalled'' torch is the broken one \\
+9 & M0 v4 -- baselines & yes & P100 ok but \texttt{.bin} load blocked (needs torch$\ge$2.6) \\
+10 & M0 v5 -- baselines & yes & torch 2.6.0+cu124 works; TA/TIES key mismatch \\
+11 & M0 v6 -- baselines & yes & all baselines run; floor $\approx0.64$ \\
+12 & M0 tuning sweep & yes & TA$\lambda0.1{=}0.639\approx$ published; harness validated \\
+13 & M1 -- OT averaging & yes & align $0.610$, barycenter $0.622$ (floor; negative) \\
+14 & M2 rank/scale sweep & yes & flat $0.62$--$0.63$; rank hypothesis refuted \\
+15 & M2 \otties{} vs \svdties{} & yes & OT $0.696$ > SVD $0.682$ at $\lambda0.5$ \\
+16 & M2 tune (1/2-basis) & yes & OT > SVD every $\lambda$; 2-sided worse \\
+17 & M2 \otties{} peak grid & yes & peak $0.708$ at $\lambda0.7,\kappa0.2$ \\
+18 & M3 v1 & yes & private-repo clone fail (fail-fast) \\
+19 & M3 v2 & yes & same, retry cannot fix auth (fail-fast) \\
+20 & M3 v3 & yes & embedded base64 corrupts (fail-fast) \\
+21 & M3 v4 & yes & success; mixed-rank \otties{} $0.698$, GW $0.623$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{The exact free-compute recipe}
+\label{app:recipe}
+A reader can reproduce every result with the following recipe.
+\begin{enumerate}[leftmargin=1.5em,itemsep=2pt]
+\item \textbf{Offline}: \texttt{pip install -e .}; \texttt{pytest -q} (expect $17/17$); the merge core
+needs only NumPy + POT.
+\item \textbf{Make the code reachable}: push the repository to a public Git host; on the worker,
+\texttt{pip install git+<url>} (with a few retries to absorb transient clone failures). Do not embed the
+code as a base64 blob; do not rely on a private repo (anonymous clone fails).
+\item \textbf{Environment on the GPU worker} (the one combination that works on a P100):
+\texttt{pip install torch==2.6.0 torchvision==0.21.0 --index-url
+https://download.pytorch.org/whl/cu124}, then \texttt{POT==0.9.6 peft transformers safetensors
+git+<fusion\_bench>}, constrained to that torch. Run a CUDA sanity check first and abort on failure.
+\item \textbf{Modelpool}: a \texttt{CLIPVisionModelPool} YAML over the eight
+\texttt{hoffman-lab/KnOTS-ViT-B-32\_lora\_R16\_<task>} adapters; \texttt{merge\_and\_unload:true} for the
+baseline path, \texttt{false} (factored) for the OT path.
+\item \textbf{Taskpool}: build the \texttt{CLIPVisionModelTaskPool} directly from FusionBench's
+\texttt{\_template} (base \texttt{openai/clip-vit-base-patch32}; test datasets from the shipped per-task
+configs); do not rely on Hydra \texttt{compose}.
+\item \textbf{Baselines}: \texttt{TaskArithmeticAlgorithm(scaling\_factor=0.1)};
+\texttt{TiesMergingAlgorithm(scaling\_factor=0.3, threshold=20, remove\_keys=[], merge\_func='mean')}.
+\item \textbf{Our method}: \texttt{ot\_lora\_merge.ot\_ties\_model(layer\_adapters, k=128, keep=0.2,
+lam=0.7)} on the unmerged factors; add the returned per-layer $\dW^\star$ to the base
+$\{q,k,v,\text{out}\}_{\text{proj}}$ weights; evaluate.
+\item \textbf{Heterogeneous rank}: SVD-truncate adapters to the desired ranks before the merge; the same
+\texttt{ot\_ties\_model} call works unchanged.
+\end{enumerate}
+Every kernel writes an incremental log and a result CSV; all are released under \texttt{results/}.
+
+\subsection{What a replicator should expect to see}
+Running the recipe should reproduce: the specialist accuracies (Table~\ref{tab:specialists}); the naive
+floor $\approx0.64$ with Task Arithmetic at $\lambda{=}0.1$ matching $0.638$; the OT-averaging plateau at
+$\approx0.62$ across ranks; \svdties{}$\approx0.687$ and \otties{}$\approx0.708$ with the OT-over-SVD gap
+positive at every $\lambda$; and the mixed-rank \otties{} at $\approx0.698$. Small ($\pm0.005$) deviations
+are expected from dataloader and BLAS nondeterminism; the \emph{relative} orderings (OT $>$ SVD $>$ floor;
+mixed $\approx$ homogeneous) are stable.
