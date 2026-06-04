@@ -38,8 +38,8 @@
 Interference-Resolved Merging of Low-Rank Adapters}}
 
 \author{
-Hilmi Nur Ardian\\
-\texttt{master.ardian@gmail.com}
+Hilmi\\
+\url{https://master-hilmi.vercel.app/}
 }
 \date{June 2026}
 
@@ -53,7 +53,7 @@ retraining is an attractive route to compute-frugal model reuse. The strongest e
 subspace} in which the per-task updates are expressed, and (ii) inside that subspace they
 \emph{resolve interference} (sign election, magnitude trimming) rather than naively averaging.
 The subspace, however, is invariably chosen by a singular value decomposition (SVD) of the stacked
-task updates -- an algebraic, geometry-agnostic choice. In this paper we ask whether
+task updates, an algebraic, geometry-agnostic choice. In this paper we ask whether
 \emph{optimal transport} (OT) yields a better shared subspace. We make three contributions.
 First, we give a careful negative result: merging LoRA adapters by an OT \emph{average}
 (a Wasserstein barycenter of their singular-direction distributions) plateaus at the
@@ -67,7 +67,7 @@ model from the $\sim\!0.64$ naive floor to $0.708$. Third, we show a structural 
 rank-fixed baselines cannot offer: because \otties{} (and a Gromov--Wasserstein variant) operate on
 the full update $\dW=BA$ rather than a fixed-rank quotient, they natively merge a
 \emph{heterogeneous-rank} adapter zoo (ranks $\{4,8,16\}$), losing only $1.0$ point relative to the
-homogeneous case -- a setting GeoMerge's fixed-rank quotient and Core Space's shared rank-$r$ basis
+homogeneous case, a setting GeoMerge's fixed-rank quotient and Core Space's shared rank-$r$ basis
 cannot enter at all. Every merge runs on CPU in minutes; the entire study was produced on free
 Kaggle GPUs used only for evaluation. Code, configurations, and all logs are released.
 \end{abstract}
@@ -89,15 +89,15 @@ same backbone, can we \emph{merge} them into a single model that performs all ta
 further training and without access to task data?
 
 Model merging \citep{wortsman2022soups,ilharco2023task,yadav2023ties,li2023deepfusion} answers
-``sometimes.'' The naive answer -- average the weights, or sum the task vectors
-$\sum_t \dW_t$ -- degrades badly as the number of tasks grows, because independently trained updates
+``sometimes.'' The naive answer, average the weights, or sum the task vectors
+$\sum_t \dW_t$, degrades badly as the number of tasks grows, because independently trained updates
 \emph{interfere}: they overlap in parameter space, disagree in sign, and differ wildly in magnitude
 \citep{yadav2023ties}. The merging literature has converged on two complementary fixes.
 \textbf{Interference resolution} (TIES \citep{yadav2023ties}, DARE \citep{yu2024dare}) trims small
 entries, elects a per-coordinate sign by majority, and averages only the agreeing tasks.
 \textbf{Subspace alignment} (KnOTS \citep{stoica2024knots}, Core Space \citep{panariello2025corespace},
 GeoMerge \citep{dasilva2026geomerge}, EpiMer \citep{lu2026epimer}) first projects every task into a
-common low-dimensional basis -- typically obtained from an SVD of the stacked updates -- so that
+common low-dimensional basis, typically obtained from an SVD of the stacked updates, so that
 interference resolution operates on aligned coordinates. The state of the art for LoRA merging marries
 the two: KnOTS performs TIES \emph{inside} an SVD-aligned space, and Core Space / GeoMerge refine the
 choice of basis and the averaging geometry.
@@ -118,7 +118,7 @@ OT is, surprisingly, almost absent from the merging literature. A recent survey 
 methods finds only a handful that use transport at all, and the one explicit OT-merging paper, OTMF
 \citep{pan2025otmf}, transports \emph{activation} distributions to learn masks (a data-dependent,
 full-model procedure), not the weight-space, data-free, low-rank merge we study. The classical OT model
-fusion of \citet{singh2020fusion} aligns \emph{neurons} across full $d\times d$ layers -- expensive and
+fusion of \citet{singh2020fusion} aligns \emph{neurons} across full $d\times d$ layers, expensive and
 unrelated to the low-rank structure of LoRA. The lane ``merge LoRA adapters by optimal transport in the
 rank-$r$ subspace'' is essentially empty.
 
@@ -128,8 +128,8 @@ comparison, and we report both a negative and a positive result.
 
 \begin{enumerate}[leftmargin=1.4em,itemsep=2pt]
 \item \textbf{A clean negative result (Section~\ref{sec:method-averaging}, \ref{sec:results-averaging}).}
-The most ``natural'' OT merge -- represent each task as a distribution over its rank-$r$ singular
-directions and take their \emph{Wasserstein barycenter} -- does \emph{not} beat naive averaging. Across
+The most ``natural'' OT merge, represent each task as a distribution over its rank-$r$ singular
+directions and take their \emph{Wasserstein barycenter}, does \emph{not} beat naive averaging. Across
 target ranks $\{16,32,64,128\}$ and scalings, OT-barycenter and OT-alignment both plateau at the
 simple-average floor ($\approx 0.62$ normalized accuracy), \emph{below} tuned task arithmetic.
 The reason is structural and we make it precise: a transport barycenter is still an \emph{average}, so it
@@ -151,7 +151,7 @@ interference resolution.
 Because \otties{} operates on the full update $\dW_t=B_tA_t$ rather than a fixed-rank manifold, and
 because we also provide a Gromov--Wasserstein (GW) variant that couples tasks by their \emph{intra-task}
 geometry, our method natively merges a \emph{heterogeneous-rank} adapter zoo (mixed ranks
-$\{4,8,16\}$). It loses only $1.0$ point relative to the homogeneous-rank case -- in a regime where
+$\{4,8,16\}$). It loses only $1.0$ point relative to the homogeneous-rank case, in a regime where
 GeoMerge's fixed-rank quotient and Core Space's shared rank-$r$ basis cannot operate at all without
 ad-hoc padding.
 \end{enumerate}
@@ -171,7 +171,7 @@ combiner, not to the OT subspace (Section~\ref{sec:analysis}).}
 \paragraph{Compute-frugality as a first-class goal.}
 Every merge in this paper is a sequence of small ($r\times r$ to $k\times k$, $r\le 16$, $k\le 128$)
 linear-algebra operations and runs on a CPU in minutes for the full ViT-B/32 model; no GPU is needed for
-the merge itself, only for evaluation. The complete study -- reproducing five baseline configurations,
+the merge itself, only for evaluation. The complete study, reproducing five baseline configurations,
 two failed OT-averaging families, the \otties{} ablation grid, and the heterogeneous-rank experiment --
 was carried out entirely on the free tier of Kaggle (30 GPU-hours/week, T4/P100), using the GPU solely to
 evaluate merged models. We view this not merely as convenience but as part of the contribution: a
@@ -190,11 +190,11 @@ compute-frugal CPU cost.}
 \toprule
 Finding & Evidence & Section \\
 \midrule
-OT \emph{averaging} does not beat the naive floor & $0.61$--$0.63$ at all ranks/scales & \ref{sec:results-averaging} \\
+OT \emph{averaging} does not beat the naive floor & $0.61$ to $0.63$ at all ranks/scales & \ref{sec:results-averaging} \\
 Interference resolution lifts off the floor & \svdties{} $0.687$, \otties{} $0.708$ vs $0.64$ & \ref{sec:results-otties} \\
 OT subspace $>$ SVD subspace, identical combiner & $+0.7$ to $+1.9$ pts, every $\lambda$ & \ref{sec:results-otties} \\
 Heterogeneous-rank merge (baselines cannot) & mixed $\{4,8,16\}$ at $0.698$ ($-1.0$ pt) & \ref{sec:results-hetero} \\
-Compute-frugal by construction & $264$--$359$\,s CPU, full model & \ref{sec:results-compute} \\
+Compute-frugal by construction & $264$ to $359$\,s CPU, full model & \ref{sec:results-compute} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -215,7 +215,7 @@ of \citet{li2023deepfusion}.
 
 \subsection{Interference resolution}
 TIES-Merging \citep{yadav2023ties} identified three interference modes when summing task vectors --
-redundant parameters, sign conflicts, and magnitude disparities -- and resolves them by
+redundant parameters, sign conflicts, and magnitude disparities, and resolves them by
 (i) \emph{trimming} all but the top-magnitude entries of each task vector, (ii) electing a per-parameter
 sign by the sign of the aggregate, and (iii) averaging only the tasks that agree with the elected sign.
 DARE \citep{yu2024dare} shows that delta parameters are highly redundant and can be randomly dropped and
@@ -253,7 +253,7 @@ require all adapters to have the same rank $r$). Our heterogeneous-rank experime
 Concretely, EpiMer \citep{lu2026epimer} restricts the Fr\'echet mean to the task-vector subspace and
 exploits a projected Hessian for curvature, while GeoMerge \citep{dasilva2026geomerge} parameterizes the
 merged adapter on the product manifold of left/right Stiefel factors and an SPD core, quotiented by the
-$O(r)$ rotation gauge -- a construction that is only well defined when all adapters share the rank $r$
+$O(r)$ rotation gauge, a construction that is only well defined when all adapters share the rank $r$
 that fixes the Stiefel and SPD dimensions. The Riemannian-\emph{training} line
 \citep{zhang2024riemannian,park2025stiefel,bogachev2025riemannlora} likewise pins the rank during
 optimization. None of these can accept a bank of adapters with ranks $\{4,8,16\}$ without first padding or
@@ -261,11 +261,11 @@ projecting to a common $r$ (which either fabricates or discards signal). Our met
 homogenization because it works on $\dW_t=B_tA_t$ and a fixed ambient dimension $k$.
 
 \subsection{Optimal transport in model merging}
-OT is mature in machine learning -- Sinkhorn's entropic regularization \citep{cuturi2013sinkhorn} made
+OT is mature in machine learning, Sinkhorn's entropic regularization \citep{cuturi2013sinkhorn} made
 it differentiable and fast; Wasserstein barycenters \citep{agueh2011barycenters} average distributions
 geometrically; Gromov--Wasserstein \citep{memoli2011gromov,peyre2016gromov} couples distributions across
 \emph{incomparable} spaces; the POT library \citep{flamary2021pot} provides solvers. Yet in merging, OT
-is rare. \citet{singh2020fusion} fuse models by transporting \emph{neurons} across full layers -- a
+is rare. \citet{singh2020fusion} fuse models by transporting \emph{neurons} across full layers, a
 $d\times d$ problem unrelated to low-rank structure. OTMF \citep{pan2025otmf} transports
 \emph{activation} distributions to learn fusion masks in a continual setting, requiring data forward
 passes. To our knowledge no prior work uses OT to choose the \emph{weight-space, data-free, low-rank}
@@ -281,7 +281,7 @@ $BA$. On structure and efficiency, Uni-LoRA \citep{li2025unilora} reinterprets m
 single global subspace projection, LISA \citep{pan2024lisa} replaces low-rank updates with layerwise
 importance sampling, LoSiA \citep{wang2025losia} localizes high-rank subnets, and a stronger
 mixture-of-LoRA-experts \citep{sun2025moelora} preconditions expert gradients. The
-\emph{asymmetry} of the two factors -- $A$ extracts features, $B$ projects them -- was made explicit by
+\emph{asymmetry} of the two factors, $A$ extracts features, $B$ projects them, was made explicit by
 \citet{zhu2024asymmetry}, motivating our use of paired (left\,$\times$\,right) ground costs rather than a
 single-factor cost. In continual settings, C-LoRA \citep{zhang2025clora} and the perturb-then-merge
 framework of \citet{qiu2025perturbmerge} fold merging into the learning loop. RDP-LoRA
@@ -413,7 +413,7 @@ a mass-$p_{t,k}$ atom at the paired left/right direction $(u_{t,k},v_{t,k})$. Cr
 $\dW_t = s_t B_t A_t$ has rank at most $r_t$, this SVD is computed in the $r_t\times r_t$ space via two
 thin QR factorizations of $B_t$ and $A_t^\top$ followed by an $r_t\times r_t$ SVD; the full
 $m\times n$ matrix is never formed. All transport problems below are therefore $r_i\times r_j$ or
-$k\times k$ with $r\le 16$, $k\le128$ -- microseconds to milliseconds on a CPU.
+$k\times k$ with $r\le 16$, $k\le128$, microseconds to milliseconds on a CPU.
 
 \begin{lemma}[Exact rank-$r$ SVD without densification]
 \label{lem:thinsvd}
@@ -468,8 +468,8 @@ small problems we fall back to the exact network-flow (EMD) solver, which is mic
 The free-support Wasserstein barycenter is computed by the alternating scheme of
 \citet{agueh2011barycenters,peyre2019computational}: hold the support $\nu$ fixed and transport to each
 $\mu_t$; then update each atom of $\nu$ as the $\lambda$-weighted barycentric image of its transported
-mass; iterate. We keep this update \emph{factored} -- the accumulated left/right factors are stacked and
-re-orthogonalized by the thin-SVD of Lemma~\ref{lem:thinsvd} -- so a barycenter over eight rank-$16$
+mass; iterate. We keep this update \emph{factored}, the accumulated left/right factors are stacked and
+re-orthogonalized by the thin-SVD of Lemma~\ref{lem:thinsvd}, so a barycenter over eight rank-$16$
 tasks never forms a dense $768\times768$ matrix until the final reconstruction.
 
 \begin{remark}[Why a single ground cost is principled here]
@@ -478,7 +478,7 @@ directions $U$) carries the task-discriminative content, while $A$ (spanning $V$
 feature reader. This motivates two of our design choices: (i) the \emph{paired} cost
 $C^{\text{paired}}$ couples left \emph{and} right collinearity so that a match must agree on both the
 ``what'' and the ``where''; (ii) our reconstruction is \emph{one-sided} in the left basis $U$, which we
-find empirically dominates the two-sided variant (Section~\ref{sec:results-otties}) -- consistent with
+find empirically dominates the two-sided variant (Section~\ref{sec:results-otties}), consistent with
 the output directions being the load-bearing ones.
 \end{remark}
 
@@ -520,7 +520,7 @@ $\nu$ from the SVD of the stacked, mass-weighted directions, then alternate Sink
 to each $\mu_t$ and a barycentric re-estimation of $\nu$'s $R$ atoms (computed by a thin QR-based SVD so
 the dense $m\times n$ matrix is never formed). Return the dense $\dW^\star=U_\nu\Sigma_\nu V_\nu^\top$.
 
-Both are genuine OT merges, both are cheap, and -- as Section~\ref{sec:results-averaging} shows -- both
+Both are genuine OT merges, both are cheap, and, as Section~\ref{sec:results-averaging} shows, both
 fail to beat naive averaging at any rank or scaling. The diagnosis is structural:
 
 \begin{proposition}[Averaging cannot resolve sign interference]
@@ -586,7 +586,7 @@ The SVD of the stacked factors weights directions purely by squared singular val
 \emph{consistently} a direction recurs across tasks. The OT barycenter, by contrast, places its atoms
 where transported task masses \emph{agree}: a direction that several tasks share (after sign-invariant
 alignment) accumulates barycentric mass, while idiosyncratic directions are spread out. The leading
-subspace of the barycenter therefore favors \emph{cross-task-consistent} directions -- precisely the
+subspace of the barycenter therefore favors \emph{cross-task-consistent} directions, precisely the
 coordinates where subsequent sign election is meaningful. This is a hypothesis, and we test it directly.
 
 \begin{remark}[A two-task illustration]
@@ -596,7 +596,7 @@ columns by singular value and may place a private direction above the shared $w$
 singular value is large, diluting the coordinate where resolution matters. The OT barycenter, after
 sign-invariant alignment, transports both tasks' mass onto $w$ (they agree there) and \emph{spreads} the
 private directions (no partner to transport to), so $w$ accumulates barycentric mass and dominates the
-leading subspace. Running TIES in the OT subspace therefore votes on $w$ -- where the vote is meaningful
+leading subspace. Running TIES in the OT subspace therefore votes on $w$, where the vote is meaningful
 -- rather than on a task-idiosyncratic axis. The uniform $\Delta>0$ in Table~\ref{tab:otties} is the
 benchmark-scale shadow of this toy.
 \end{remark}
@@ -604,7 +604,7 @@ benchmark-scale shadow of this toy.
 \subsection{Heterogeneous-rank merging via Gromov--Wasserstein}
 \label{sec:method-gw}
 A practical adapter zoo is heterogeneous: different tasks are trained at different ranks. The rank-fixed
-methods cannot enter this regime -- GeoMerge's quotient and Core Space's shared rank-$r$ basis are
+methods cannot enter this regime, GeoMerge's quotient and Core Space's shared rank-$r$ basis are
 defined only for a common $r$. \otties{} already handles it, because it operates on $\dW_t$ (any rank)
 and a fixed subspace dimension $k$. We additionally provide a fully OT-native route: a GW merge
 (Eq.~\eqref{eq:gw}) that couples each task to a highest-rank anchor by intra-task structure only
@@ -629,8 +629,8 @@ the input rank (we apply a rank-$\le k$ delta directly to the weight). A Core-Sp
 re-projection on top of the OT basis is a natural hybrid.
 \item \textbf{GeoMerge} \citep{dasilva2026geomerge} computes a Fr\'echet mean on the fixed-rank quotient
 $(\mathrm{St}\times\mathrm{SPD}\times\mathrm{St})/O(r)$. This is an \emph{average} (a Fr\'echet mean is the
-manifold generalization of the mean), and by Proposition~\ref{prop:avg} an average -- however
-geometrically faithful -- cannot perform sign election; GeoMerge recovers strong numbers by a high-rank
+manifold generalization of the mean), and by Proposition~\ref{prop:avg} an average, however
+geometrically faithful, cannot perform sign election; GeoMerge recovers strong numbers by a high-rank
 \emph{lift} that enlarges the subspace before averaging, not by interference resolution. The two
 philosophies (richer average vs.\ resolve-then-combine) are complementary, and combining the GeoMerge lift
 with an \otties{}-style resolver is an interesting open direction. Crucially, GeoMerge's quotient is
@@ -646,7 +646,7 @@ For each of the $L$ adapted layers, the cost is dominated by: $T$ thin SVDs of r
 $O(mr^2)$ each), a barycenter with a constant number of Sinkhorn solves on $k\times r$ cost matrices
 ($O(k r)$ per iteration), and the TIES combine on a $k\times n$ array ($O(Tkn)$). No step touches a
 GPU and none forms an $m\times n$ dense matrix more than once. For ViT-B/32 ($L=24$ adapted attention
-projections, $m{=}n{=}768$, $r{=}16$, $k{=}128$) a full-model merge takes $\approx 4$--$6$ minutes on a
+projections, $m{=}n{=}768$, $r{=}16$, $k{=}128$) a full-model merge takes $\approx 4$ to $6$ minutes on a
 single CPU core (Section~\ref{sec:results-hetero}). By contrast GeoMerge runs an iterative Riemannian
 $\mathrm{Exp}/\mathrm{Log}$ loop and KnOTS a full-$\dW$ SVD per layer. Compute-frugality is thus not an
 afterthought but a structural property of working in the rank-$r$/$k$ subspace.
@@ -668,7 +668,7 @@ $m\times n$ update is formed only once at the end. All operations are dense smal
 \end{proof}
 
 \noindent For ViT-B/32 ($m{=}n{=}768$, $r{=}16$, $k{=}128$, $T{=}8$, $N\le 12$, $L{=}24$ layers) this
-predicts a few minutes single-core, matching the measured $264$--$359$\,s in
+predicts a few minutes single-core, matching the measured $264$ to $359$\,s in
 Table~\ref{tab:hetero}.
 
 % =====================================================================
@@ -754,8 +754,8 @@ Accuracy & 0.649 & 0.741 & 0.886 & 0.996 & 0.965 & 0.930 & 0.994 & 0.580 \\
 
 \subsection{Baselines reproduce the literature floor}
 \label{sec:results-baselines}
-Table~\ref{tab:baselines} reports the naive baselines after tuning. All three -- simple average, tuned
-task arithmetic, and tuned TIES -- cluster at $\approx 0.63$--$0.64$ normalized accuracy. This is the
+Table~\ref{tab:baselines} reports the naive baselines after tuning. All three, simple average, tuned
+task arithmetic, and tuned TIES, cluster at $\approx 0.63$ to $0.64$ normalized accuracy. This is the
 expected pattern in the literature: the \emph{naive} family floors around $0.64$, and the advanced
 methods (KnOTS $0.740$, Core Space $0.764$, GeoMerge $0.771$) are the bar to beat. The merges are
 extremely sensitive to scaling: task arithmetic collapses from $0.639$ at $\lambda=0.1$ to $0.405$ at
@@ -773,7 +773,7 @@ harness. The naive family floors at $\approx0.64$; the advanced published method
 \toprule
 Method & config & avg.\ normalized acc. \\
 \midrule
-Simple average & --- & 0.636 \\
+Simple average & n/a & 0.636 \\
 Task Arithmetic & $\lambda=0.1$ & \textbf{0.639} \\
 Task Arithmetic & $\lambda=0.2$ & 0.566 \\
 Task Arithmetic & $\lambda=0.3$ & 0.405 \\
@@ -796,7 +796,7 @@ Table~\ref{tab:averaging} reports the OT-average merges. M-align and M-bary land
 target rank over $\{16,32,64,128\}$ moves the number by less than half a point ($0.622\to0.627$);
 increasing the scaling actively hurts ($\lambda{=}2\!:0.556$, $\lambda{=}4\!:0.263$). This confirms
 Proposition~\ref{prop:avg} empirically: the ceiling is set by the \emph{averaging}, not by the quality
-or rank of the transport. The per-task breakdown shows the signature of unresolved interference -- easy,
+or rank of the transport. The per-task breakdown shows the signature of unresolved interference, easy,
 near-orthogonal tasks survive (SUN397 $0.63$) while conflict-heavy tasks collapse (SVHN $0.34$, GTSRB
 $0.35$, EuroSAT $0.46$).
 
@@ -819,7 +819,7 @@ OT barycenter & $R{=}128$ & 0.626 \\
 OT barycenter & $R{=}128$, $\lambda{=}2$ & 0.556 \\
 OT barycenter & $R{=}128$, $\lambda{=}4$ & 0.263 \\
 \midrule
-\emph{(reference)} simple average & --- & 0.636 \\
+\emph{(reference)} simple average & n/a & 0.636 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -845,7 +845,7 @@ between the two columns is SVD-vs-OT choice of $U$, this isolates the geometry o
 source of the gain. The two-sided variant (projecting both $U$ and $V$, a fuller KnOTS-style
 reconstruction) was \emph{worse} for both bases (over-compression), so we keep the one-sided left-basis
 form. A fine peak grid (Table~\ref{tab:peak}) places the optimum at $\lambda=0.7$, $\kappa=0.2$, with the
-accuracy surface flat ($0.70$--$0.708$) around it.
+accuracy surface flat ($0.70$ to $0.708$) around it.
 
 \begin{figure}[t]
 \centering
@@ -873,9 +873,9 @@ $\lambda$ & \svdties{} (SVD subspace) & \otties{} (OT subspace, ours) & $\Delta$
 0.4 & 0.672 & 0.682 & $+1.0$ \\
 0.5 & 0.682 & 0.696 & $+1.4$ \\
 0.6 & 0.687 & 0.706 & $+1.9$ \\
-0.7 & --- & \textbf{0.708} & --- \\
+0.7 & n/a & \textbf{0.708} & n/a \\
 \midrule
-\multicolumn{4}{l}{\emph{two-sided reconstruction ($\lambda{=}0.5$): worse for both -- dropped}}\\
+\multicolumn{4}{l}{\emph{two-sided reconstruction ($\lambda{=}0.5$): worse for both, dropped}}\\
 2-sided & 0.680 & 0.654 & \\
 \bottomrule
 \end{tabular}
@@ -891,7 +891,7 @@ surface is flat around it. (One cell failed on a transient HuggingFace timeout a
 \toprule
 & $\kappa=0.1$ & $\kappa=0.2$ & $\kappa=0.3$ \\
 \midrule
-$\lambda=0.6$ & --- & 0.706 & 0.693 \\
+$\lambda=0.6$ & n/a & 0.706 & 0.693 \\
 $\lambda=0.7$ & 0.701 & \textbf{0.708} & 0.698 \\
 $\lambda=0.8$ & 0.667 & 0.703 & 0.690 \\
 \bottomrule
@@ -921,11 +921,11 @@ $\kappa=0.2$, $\lambda=0.7$.
 To probe the regime the rank-fixed methods cannot enter, we build a genuinely mixed-rank adapter zoo by
 SVD-truncating the eight rank-16 adapters to assigned ranks (SUN397, EuroSAT, MNIST $\to 16$; Cars,
 SVHN, DTD $\to 8$; RESISC45, GTSRB $\to 4$). This requires no training. Table~\ref{tab:hetero} reports
-the outcome. \otties{} merges the mixed-rank zoo at $0.698$ -- only $1.0$ point below the homogeneous
-rank-16 case ($0.708$) and still far above the naive floor -- \emph{in a setting where GeoMerge's
+the outcome. \otties{} merges the mixed-rank zoo at $0.698$, only $1.0$ point below the homogeneous
+rank-16 case ($0.708$) and still far above the naive floor, \emph{in a setting where GeoMerge's
 fixed-rank quotient and Core Space's shared rank-$r$ basis are undefined}. The GW-native operator also
 runs end-to-end ($0.623$); it is weaker than the \otties{} subspace route but is the more general
-fallback when no shared ambient frame is assumed. Both merges are pure CPU, $264$--$359$ seconds for the
+fallback when no shared ambient frame is assumed. Both merges are pure CPU, $264$ to $359$ seconds for the
 full model.
 
 \begin{table}[t]
@@ -959,7 +959,7 @@ rank-fixed state of the art (GeoMerge, Core Space) cannot operate in this regime
 
 \subsection{Compute cost}
 \label{sec:results-compute}
-Across all merges, the full-model merge cost is $\approx 4$--$6$ minutes on a single CPU core
+Across all merges, the full-model merge cost is $\approx 4$ to $6$ minutes on a single CPU core
 (Table~\ref{tab:hetero}): the barycenter-subspace construction dominates, the TIES combine and
 reconstruction are negligible, and no GPU is touched. Evaluation (not merging) is the only GPU cost, and
 it is shared by all methods. This supports the compute-frugality claim of
@@ -970,7 +970,7 @@ Section~\ref{sec:method-complexity}: the method is cheap by construction, not by
 \label{sec:analysis}
 
 \paragraph{Why averaging fails and resolution succeeds.}
-The three regimes we observe -- averaging at $0.62$, \svdties{} at $0.69$, \otties{} at $0.71$ -- separate
+The three regimes we observe, averaging at $0.62$, \svdties{} at $0.69$, \otties{} at $0.71$, separate
 two distinct levers. The jump from $0.62$ to $0.69$ is \emph{interference resolution}: introducing the
 sign election removes the destructive cancellation of Proposition~\ref{prop:avg}, and it is worth
 $\sim\!7$ points. This dwarfs anything OT-as-averaging could buy, which is why the rank/scaling sweeps in
@@ -982,7 +982,7 @@ us attribute the second gain to OT specifically.
 \paragraph{What the OT subspace captures.}
 The SVD of stacked factors ranks directions by squared singular value alone. The barycenter instead
 accumulates mass where transported task directions \emph{agree} after sign-invariant alignment, so its
-leading subspace emphasizes cross-task-consistent directions -- exactly the coordinates where a
+leading subspace emphasizes cross-task-consistent directions, exactly the coordinates where a
 subsequent sign vote is informative. The monotone $\Delta>0$ across all $\lambda$
 (Table~\ref{tab:otties}) is consistent with this: the OT basis does not merely shift the optimum, it
 provides uniformly better coordinates for resolution.
@@ -992,7 +992,7 @@ provides uniformly better coordinates for resolution.
 \emph{simplified} KnOTS (one-sided left basis, no whitening, no two-sided reconstruction) and reaches
 $0.687$, $\sim\!5$ points below full KnOTS. The gap between $0.708$ and $0.740$ is therefore largely
 attributable to these simplifications of the \emph{combiner/reconstruction}, not to the OT idea: the
-controlled $+0.7$--$1.9$ point OT-over-SVD advantage is what our experiments actually license us to
+controlled $+0.7$ to $1.9$ point OT-over-SVD advantage is what our experiments actually license us to
 claim, and it holds under apples-to-apples conditions. Closing the absolute gap (two-sided whitened
 reconstruction matched to full KnOTS, then OT subspace on top) is the most promising next step toward
 beating the bar outright.
@@ -1011,11 +1011,11 @@ $\lambda$ grows the SVD basis saturates and then degrades earlier, while the OT 
 scaling before over-shooting. This is consistent with the OT subspace concentrating signal on fewer,
 cross-task-consistent directions, so a larger global scale is admissible before noise is amplified.
 Second, the peak is \emph{flat} in $(\lambda,\kappa)$ around $(0.7,0.2)$ (Table~\ref{tab:peak}), i.e.\ the
-method is not brittle to its two hyperparameters -- a practical virtue for a data-free merge where no
+method is not brittle to its two hyperparameters, a practical virtue for a data-free merge where no
 validation set is assumed.
 
 \paragraph{Compute as a contribution, not a footnote.}
-The merge-time column of Table~\ref{tab:hetero} ($264$--$359$\,s, single CPU core, full model) should be
+The merge-time column of Table~\ref{tab:hetero} ($264$ to $359$\,s, single CPU core, full model) should be
 read against the iterative GPU procedures of the rank-fixed state of the art: GeoMerge's Riemannian
 $\mathrm{Exp}/\mathrm{Log}$ loop and Core Space's per-layer SVDs are markedly heavier, and neither runs on
 the merge-side without a GPU at the scales they target. For a laboratory whose entire budget is a free
@@ -1063,7 +1063,7 @@ adapter sharing.
 \label{sec:future}
 Three directions follow directly. \textbf{(1) Closing the absolute gap.} Our SVD control is a simplified
 KnOTS; matching the full two-sided whitened reconstruction and then placing the OT subspace on top is the
-most direct route to test whether the controlled $+0.7$--$1.9$ point advantage carries through to beating
+most direct route to test whether the controlled $+0.7$ to $1.9$ point advantage carries through to beating
 the $0.74$ bar outright. \textbf{(2) Better transport.} We fixed the paired-cosine cost and
 $\varepsilon=10^{-2}$; a cost/$\varepsilon$ sweep, Grassmann/chordal costs, and a Fisher-Rao ground
 metric (linking to the natural-gradient view of merging \citep{amari1998natural,matena2022fisher}) may
@@ -1081,12 +1081,12 @@ a guarantee.
 \label{sec:conclusion}
 We asked whether optimal transport yields a better subspace for merging low-rank adapters than the
 ubiquitous SVD choice. The answer is nuanced and, we believe, useful. OT used as an \emph{average} does
-not help -- averaging cannot resolve the sign interference that dooms naive merges, and we make this
+not help, averaging cannot resolve the sign interference that dooms naive merges, and we make this
 precise. OT used to \emph{choose the shared subspace} in which a TIES combiner resolves interference does
 help: under an identical combiner, the OT-barycenter subspace beats the SVD subspace at every scaling we
 tested, lifting an $8$-task ViT-B/32 LoRA merge from the $0.64$ floor to $0.708$. And because our
 formulation works on the full update rather than a fixed-rank manifold, it natively merges
-heterogeneous-rank adapter zoos -- a capability the rank-fixed state of the art lacks -- while running
+heterogeneous-rank adapter zoos, a capability the rank-fixed state of the art lacks, while running
 entirely on CPU in minutes. We release all code, configurations, and logs, and hope the controlled
 ``OT-subspace vs.\ SVD-subspace'' protocol is a useful template for future geometry-of-merging work.
 
@@ -1096,11 +1096,11 @@ adapters is to resolve rather than average, and any amount of geometric sophisti
 average is dominated by the simple act of sign election (Proposition~\ref{prop:avg},
 Section~\ref{sec:twoviews}). Second, \emph{once you have committed to a resolver, the coordinate system it
 acts in is a real and tunable lever}, and optimal transport supplies a measurably better one than the
-default SVD -- a finding we obtained only because we held the combiner fixed and varied the subspace in
+default SVD, a finding we obtained only because we held the combiner fixed and varied the subspace in
 isolation, which we recommend as a methodology. Third, \emph{cheapness can be designed in, not bolted on}:
 by keeping every operation in the rank-$r$/$k$ subspace, the entire method runs on a CPU in minutes and
 the entire study fits a free GPU quota, which is what makes geometry-principled merging accessible to the
-laboratories that most need to reuse public adapters. We believe the combination -- a clean negative
+laboratories that most need to reuse public adapters. We believe the combination, a clean negative
 result, a controlled positive one, and a structural capability the rank-fixed state of the art lacks --
 makes optimal transport a genuine and practical addition to the model-merging toolkit.
 
@@ -1130,7 +1130,7 @@ $C_{ij}=\|x_i-y_j\|^2$; its barycenter $\argmin_\nu\sum_t\lambda_t W_2^2(\nu,\mu
 is computed by the alternating transport/update scheme we use. Gromov--Wasserstein
 \citep{memoli2011gromov} replaces the cross-space cost by a quadratic mismatch of \emph{intra}-space
 distance matrices (Eq.~\eqref{eq:gw}); it is invariant to isometries of each space and therefore couples
-distributions that live in spaces of different dimension -- the property we exploit for
+distributions that live in spaces of different dimension, the property we exploit for
 heterogeneous-rank adapters. For all problems in this paper the supports are tiny (rank $r\le16$, or
 $k\le128$ barycenter atoms), so even the exact LP/EMD solver is negligible; entropic Sinkhorn is used for
 smoothness and speed. We use the POT library \citep{flamary2021pot} for the solvers.
@@ -1167,10 +1167,10 @@ stack to $S\in\R^{T\times k\times n}$; trim each task to its top-$\kappa$ fracti
 agreeing with $\gamma$ (denominator clamped at $1$); scale by $\lambda$. Returns $S^\star\in\R^{k\times n}$.
 
 \subsection{SVD-TIES control and the model-level driver}
-The control \svdties{} is Algorithm~\ref{alg:otties} with line~2--3 replaced by
+The control \svdties{} is Algorithm~\ref{alg:otties} with line~2 to 3 replaced by
 $U\gets\textsc{TopLeftSingular}\big([\,s_1B_1\,|\cdots|\,s_TB_T\,],\,k\big)$, i.e.\ the leading left
 singular subspace of the column-stacked task up-projections (the KnOTS-style algebraic basis). Everything
-else -- projection, TIES, reconstruction -- is byte-for-byte identical, which is what makes the
+else, projection, TIES, reconstruction, is byte-for-byte identical, which is what makes the
 comparison clean. The model-level driver simply applies the chosen layer routine to every adapted layer:
 \begin{algorithm}[H]
 \caption{Model-level merge (\otties{} or \svdties{})}
@@ -1307,8 +1307,8 @@ PEFT key layout, FusionBench taskpool construction, method constructor signature
 \item \textbf{Fail-fast scaffolding.} Each run writes incremental logs and wraps every evaluation in a
 try/except so a single failed cell never discards the whole run's results.
 \end{itemize}
-The net effect is that a multi-week research project -- five baseline configurations, two negative OT
-families, the \otties{} ablation grid, a peak grid, and a heterogeneous-rank study -- fit comfortably
+The net effect is that a multi-week research project, five baseline configurations, two negative OT
+families, the \otties{} ablation grid, a peak grid, and a heterogeneous-rank study, fit comfortably
 inside the free weekly quota.
 
 \section{Catalogue of negative and null results}
@@ -1337,7 +1337,7 @@ as CSVs.
 \toprule
 Method & config & NA \\
 \midrule
-Simple average & --- & 0.636 \\
+Simple average & n/a & 0.636 \\
 Task Arithmetic & $\lambda=0.1$ & 0.639 \\
 Task Arithmetic & $\lambda=0.2$ & 0.566 \\
 Task Arithmetic & $\lambda=0.3$ & 0.405 \\
@@ -1373,7 +1373,7 @@ $\lambda{=}0.5$ (2-side) & 0.680 & 0.654 \\
 \toprule
 \otties{} & $\kappa{=}0.1$ & $\kappa{=}0.2$ & $\kappa{=}0.3$ \\
 \midrule
-$\lambda{=}0.6$ & --- & 0.706 & 0.693 \\
+$\lambda{=}0.6$ & n/a & 0.706 & 0.693 \\
 $\lambda{=}0.7$ & 0.701 & \textbf{0.708} & 0.698 \\
 $\lambda{=}0.8$ & 0.667 & 0.703 & 0.690 \\
 \bottomrule
